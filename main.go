@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"net/http"
+	"os"
 	"text/template"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/yuin/goldmark"
 )
 func main() {
+
 	t := &Template{
 		templates: template.Must(template.ParseGlob("www/index.html")),
 	}
@@ -22,7 +26,17 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 	e.GET("/render", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "hello", "world")
+		b, err := os.ReadFile("tasks/task01/README.md")
+		if err != nil {
+			panic(err)
+		}
+
+		var buf bytes.Buffer
+		if err := goldmark.Convert(b, &buf); err != nil {
+			panic(err)
+		}
+
+		return c.Render(http.StatusOK, "hello", buf.String())
 	})
 	e.Logger.Fatal(e.Start(":8080"))
 }
