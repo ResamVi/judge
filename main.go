@@ -16,67 +16,72 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-func main() {
-	base := template.Must(template.ParseGlob("www/index.html"))
+var (
+	base = template.Must(template.ParseGlob("www/index.html"))
+	md = goldmark.New(goldmark.WithRendererOptions(html.WithUnsafe()))
+)
 
+func main() {
 	t := &Template{
 		templates: template.Must(template.ParseGlob("www/index.html")),
 	}
-
-	md := goldmark.New(goldmark.WithRendererOptions(html.WithUnsafe()))
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Renderer = t
 
-	e.GET("/tasks/:task", func(c echo.Context) error {
-
-		// Convert local markdown files to HTML
-		taskMD, err := os.ReadFile("tasks/" + c.Param("task") + "/README.md")
-		if err != nil {
-			return c.NoContent(http.StatusNotFound)
-		}
-
-		var taskHTML bytes.Buffer
-		if err := md.Convert(taskMD, &taskHTML); err != nil {
-			return err
-		}
-
-		var buf bytes.Buffer
-		if err := base.ExecuteTemplate(&buf, "index", taskHTML.String()); err != nil {
-			return err
-		}
-
-		htm := fmt.Sprintf(`
-<div class="row" style="margin-top: 3em; margin-bottom:3em">
-  <div class="col-3">
-    %s
-
-  <button type="submit">Download der Aufgabe</button>
-  </div>
-
-  <div class="col">
-
-	<div class="tabs">
-		%s
-	</div>
-
-  </div>
-</div>
-		`, treeView(c.Param("task")), codeView(c.Param("task")))
-
-		result := strings.ReplaceAll(buf.String(), "{{Code}}", htm)
-
-		return c.HTML(http.StatusOK, result)
-	})
+	e.GET("/tasks/:task", taskHandler)
+	e.GET("/code/:task", codeHandler)
 	e.Static("/", "tasks")
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
+func codeHandler(c echo.Context) error {
+	return nil
+}
+
+func taskHandler(c echo.Context) error {
+	// Convert local markdown files to HTML
+	taskMD, err := os.ReadFile("tasks/" + c.Param("task") + "/README.md")
+	if err != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	var taskHTML bytes.Buffer
+	if err := md.Convert(taskMD, &taskHTML); err != nil {
+		return err
+	}
+
+	var buf bytes.Buffer
+	if err := base.ExecuteTemplate(&buf, "index", taskHTML.String()); err != nil {
+		return err
+	}
+
+	htm := fmt.Sprintf(`
+		<div class="row" style="margin-top: 3em; margin-bottom:3em">
+		<div class="col-3">
+		<div style="text-align:center"><button type="submit">Download</button></div>
+		<div>%s</div>
+		</div>
+
+		<div class="col">
+
+		<div class="tabs">
+		%s
+		</div>
+
+		</div>
+		</div>`, treeView(c.Param("task")), codeView(c.Param("task")))
+
+	result := strings.ReplaceAll(buf.String(), "{{Code}}", htm)
+
+	return c.HTML(http.StatusOK, result)
+}
+
 func treeView(name string) string {
-	tree, err := textree.TreeFromDir("./code/" + name)
+	tree, err := textree.TreeFromDir("./tasks/" + name + "/code")
 	if err != nil {
 		panic(err)
 	}
@@ -92,19 +97,25 @@ func treeView(name string) string {
 }
 
 func codeView(name string) string {
-	return `
-	  <input type="radio" name="tabs" id="tabone" checked="checked">
-	  <label for="tabone">Tab One</label>
-	  <div class="tab"> some code </div>
+	entries, err := os.ReadDir("./tasks/" + name + "/code")
+	if err != nil {
+		panic(err)
+	}
 
-	  <input type="radio" name="tabs" id="tabtwo">
-	  <label for="tabtwo">Tab Two</label>
-	  <div class="tab"> some code </div>
-	  
-	  <input type="radio" name="tabs" id="tabthree">
-	  <label for="tabthree">Tab Three</label>
-	  <div class="tab"> some code </div>`
+	code := ""
+	for _, e := range entries {
+		content, err := os.ReadFile("./tasks/" + name + "/code/" + e.Name())
+		if err != nil {
+			panic(err)
+		}
 
+		code += fmt.Sprintf(`
+			<input type="radio" name="tabs" id="tabone">
+			<label for="tabone">%s</label>
+			<div class="tab"><pre><code>%s</code></pre></div>`, e.Name(), string(content))
+	}
+
+	return code
 }
 
 type Template struct {
