@@ -12,6 +12,8 @@
 
       <link rel="stylesheet" href="https://classless.de/classless.css">
       <link rel="stylesheet" href="https://classless.de/addons/tabbox.css">
+
+      <script src="https://unpkg.com/htmx.org@2.0.4"></script>
       
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
       <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -37,16 +39,17 @@
                      <li><a href="#">Menu 2</a></li>
                   </ul>
                </li>
-               <li class="float-right"><a href="#">Anmelden</a></li>
+               <li class="float-right"><a href="/login">Anmelden</a></li>
             </ul>
          </nav>
       </div>
 
       <div style="margin-bottom: 3em">
          {{.}}
-         <div>
-            <a href="#"><span>&lt;</span> Zurück zur Übersicht</a>
+         <div style="margin-top: 2em">
+            <a href="#"><span>&lt;</span> Zurück zur Homepage</a>
          </div>
+         <!-- TODO: "zur nächsten Aufgabe" Navigation -->
       </div>
    </body>
 </html>
