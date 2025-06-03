@@ -6,6 +6,7 @@ require github.com/labstack/echo v3.3.10+incompatible
 
 require (
 	github.com/fatih/color v1.18.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
