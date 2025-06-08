@@ -22,11 +22,15 @@ func main() {
 //		- Der Name deiner ersten Karte
 //		- Der Name deiner zweiten Karte
 //		- Der Name der Karte des Dealers, die offen ist
-// - Die Funktion gibt einen Buchstaben zurück für den Zug der gemacht werden soll
+// - Die Funktion gibt den String zurück welcher Zug gemacht werden soll
 //		- "Karte" (eine weitere Karte nehmen)
 //		- "Stehen" (keine weitere mehr nehmen)
 //		- "Teilen" (Karten aufteilen)
 //		- "Sieg" (wenn man schon 21 hat)
-// - Die Funktion soll folgende Strategie implementieren
-//		- 
+// - Die Funktion soll folgende Strategie implementieren:
+//		- Falls zwei Asse: Teilen
+//		- Falls dein Kartenwert 21 ist und der Dealer kein Ass/10/Bube/Dame/König: Sieg (weil Blackjack)
+//		- Falls die Summe der Karten 17-20 ist: Stehen
+//		- Falls die Summe der Karten 12-16 ist: Stehen, außer wenn der Dealer 7 oder höher hat
+//		- Falls die Summe der Karten 11 oder kleiner ist: Karte
 //

@@ -30,43 +30,41 @@ In Wirklichkeit zählen Asse entweder 11 oder 1 sind aber für die Einfachheit n
 2. Downloade den Code mit:   
 
 ```
-judge download 07
+judge download 08
 ```
 
 
 3. Uploade den Code mit:
 ```
-judge upload 07
+judge upload 08
 ```
 
 ## Erinnerung
 
-Die logischen Operatoren
+Switch-Bedingungen
 ```
-Gleichheit              ==
-Ungleichheit 	        !=
-Weniger als 	        <
-Gleich oder weniger     <=
-Mehr als                >
-Gleich oder mehr     	>=
-```
-
-Ergebnisse von logischen Operatoren sind Booleans
-```
-a != 4 // true
-a > 5  // false
-
-"apple" < "banana"  // true
-"apple" > "banana"  // false
+switch operatingSystem {
+case "windows":
+    // do something if the operating system is windows
+case "linux":
+    // do something if the operating system is linux
+case "macos":
+    // do something if the operating system is macos
+default:
+    // do something if the operating system is none of the above
+}
 ```
 
-If-Bedingungen
+Switch-Bedingung ohne Wert
 ```
-if zahl > 0 {
-    return "Positiv"
-} else if zahl < 0 {
-    return "Negativ"
-} else {
-    return "Null"
+age := 21
+
+switch {
+case age > 20 && age < 30:
+    return "Du bist in deinen Zwanziger"
+case age == 10:
+    return "Dein Alter ist Zweistellig"
+default:
+    return "Cooles Alter!"
 }
 ```
