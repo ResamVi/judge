@@ -12,5 +12,49 @@ services:
       - POSTGRES_DB=mydb
       - POSTGRES_PASSWORD=postgres
 
+  judge0:
+    image: judge0/judge0:1.13.1
+    command: ["bash", "-c", "sudo mkdir -p /box && sudo chmod 1777 /box && exec ./scripts/server"]
+    environment:
+      - CGO_ENABLED=0
+    deploy:
+      resources:
+        limits:
+          pids: 1024
+    ulimits:
+      nproc: 4096
+      nofile: 65536
+    volumes:
+      - ./judge0.conf:/judge0.conf:ro
+    ports:
+      - "2358:2358"
+    privileged: true
+
+  worker:
+    image: judge0/judge0:1.13.1
+#    command: ["./scripts/workers"]
+    command: ["bash", "-c", "sudo mkdir -p /box && sudo chmod 1777 /box && exec ./scripts/workers"]
+    environment:
+      - CGO_ENABLED=0
+    deploy:
+      resources:
+        limits:
+          pids: 1024
+    ulimits:
+      nproc: 4096
+      nofile: 65536
+    volumes:
+    - ./judge0.conf:/judge0.conf:ro
+    privileged: true
+
+  redis:
+    image: redis:7.2.4
+    command: [
+      "bash", "-c",
+      'docker-entrypoint.sh --appendonly no --requirepass "myredispassword"'
+    ]
+    env_file: judge0.conf
+    restart: always
+
 volumes:
   postgres_data:
