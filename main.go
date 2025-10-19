@@ -3,7 +3,6 @@ package main
 import (
 	"archive/zip"
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,76 +11,48 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/ResamVi/judge/db"
+	"github.com/ResamVi/judge/handler"
+	"github.com/ResamVi/judge/migrate"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/plouc/textree"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/renderer/html"
-	"golang.org/x/crypto/bcrypt"
-
-	"github.com/ResamVi/judge/db"
-	"github.com/ResamVi/judge/handler"
-
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/pgx"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 var (
 	base = template.Must(template.ParseGlob("www/index.html"))
-	md = goldmark.New(goldmark.WithRendererOptions(html.WithUnsafe()))
+	md   = goldmark.New(goldmark.WithRendererOptions(html.WithUnsafe()))
 )
+
 func main() {
 	url := "postgres:postgres@localhost:5432/mydb?sslmode=disable" // TODO
 
-	m, err := migrate.New("file://migrations", "pgx://"+url)
-	if err != nil {
-		panic(err)
-	}
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		panic(err)
-	}
-
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, "postgres://"+url)
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close(ctx)
-
-	queries := db.New(conn)
-
-	encrypted, err := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost) // TODO: lol
+	err := migrate.DB(url)
 	if err != nil {
 		panic(err)
 	}
 
-	err = queries.UpsertUser(ctx, db.UpsertUserParams{
-		Username: "admin",
-		Password: string(encrypted),
-		Approved: true,
-	})
+	queries, err := db.Init(url)
 	if err != nil {
 		panic(err)
-	}
-
-	t := &Template{
-		templates: template.Must(template.ParseGlob("www/index.html")),
 	}
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Renderer = t
+	e.Renderer = &Template{
+		templates: template.Must(template.ParseGlob("www/index.html")),
+	}
 
-	h := handler.New(e, queries)
+	h := handler.New(queries)
 
-	e.GET("/", Homepage)
+	e.GET("/", h.Homepage)
 	e.GET("/login", LoginView)
 	e.GET("/register", RegisterView)
 
-	e.GET("/tasks/:task", TaskHandler)
+	e.GET("/tasks/:task", h.TaskHandler)
 	e.GET("/tasks/:task/code", CodeHandler)
 
 	e.POST("/login", h.Login)
@@ -95,26 +66,6 @@ func main() {
 	e.Static("/www", "www")
 
 	e.Logger.Fatal(e.Start(":8080"))
-}
-
-func Homepage(c echo.Context) error {
-	// Convert local markdown files to HTML
-	taskMD, err := os.ReadFile("www/README.md")
-	if err != nil {
-		return err
-	}
-
-	var taskHTML bytes.Buffer
-	if err := md.Convert(taskMD, &taskHTML); err != nil {
-		return err
-	}
-
-	var buf bytes.Buffer
-	if err := base.ExecuteTemplate(&buf, "index", taskHTML.String()); err != nil {
-		return err
-	}
-
-	return c.HTML(http.StatusOK, buf.String())
 }
 
 func LoginView(c echo.Context) error {
@@ -178,79 +129,43 @@ func RegisterView(c echo.Context) error {
 	return c.HTML(http.StatusOK, buf.String())
 }
 
-func TaskHandler(c echo.Context) error {
-	// Convert local markdown files to HTML
-	taskMD, err := os.ReadFile("tasks/" + c.Param("task") + "/README.md")
-	if err != nil {
-		return c.NoContent(http.StatusNotFound)
-	}
-	var taskHTML bytes.Buffer
-	if err := md.Convert(taskMD, &taskHTML); err != nil {
-		return err
-	}
-
-	// Put that converted markdown into the webpage template for display
-	var buf bytes.Buffer
-	if err := base.ExecuteTemplate(&buf, "index", taskHTML.String()); err != nil {
-		return err
-	}
-
-	// Replace occurrences of {{Code}} in the webpage with a custom file viewer
-	htm := fmt.Sprintf(`
-		<div class="row" style="margin-top: 3em; margin-bottom:3em">
-			<div class="col-3">
-				<div>%s</div>
-			</div>
-
-			<div class="col">
-				<div class="tabs">
-				%s
-				</div>
-			</div>
-		</div>`, treeView(c.Param("task")), codeView(c.Param("task")))
-
-	result := strings.ReplaceAll(buf.String(), "{{Code}}", htm)
-
-	return c.HTML(http.StatusOK, result)
-}
-
 func CodeHandler(c echo.Context) error {
-    var b []byte
-    buf := bytes.NewBuffer(b)
-    w := zip.NewWriter(buf)
+	var b []byte
+	buf := bytes.NewBuffer(b)
+	w := zip.NewWriter(buf)
 
-    walker := func(path string, info os.FileInfo, err error) error {
-        if err != nil {
-            return err
-        }
-        if info.IsDir() {
-            return nil
-        }
-        file, err := os.Open(path)
-        if err != nil {
-            return err
-        }
-        defer file.Close()
+	walker := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
 
-		strippedPath := strings.TrimPrefix(path, "tasks/" + c.Param("task") + "/code/")
+		strippedPath := strings.TrimPrefix(path, "tasks/"+c.Param("task")+"/code/")
 
-        f, err := w.Create(strippedPath)
-        if err != nil {
-            return err
-        }
+		f, err := w.Create(strippedPath)
+		if err != nil {
+			return err
+		}
 
-        _, err = io.Copy(f, file)
-        if err != nil {
-            return err
-        }
+		_, err = io.Copy(f, file)
+		if err != nil {
+			return err
+		}
 
-        return nil
-    }
+		return nil
+	}
 
-	err := filepath.Walk("tasks/" + c.Param("task") + "/code", walker)
-    if err != nil {
-        panic(err)
-    }
+	err := filepath.Walk("tasks/"+c.Param("task")+"/code", walker)
+	if err != nil {
+		panic(err)
+	}
 	w.Close()
 
 	return c.Blob(http.StatusOK, "application/zip", buf.Bytes())
@@ -293,7 +208,6 @@ func codeView(name string) string {
 
 	return code
 }
-
 
 type Template struct {
 	templates *template.Template

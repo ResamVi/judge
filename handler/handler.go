@@ -9,26 +9,142 @@ import (
 	"net/http"
 	"time"
 
+	"bytes"
 	"github.com/ResamVi/judge/db"
 	"github.com/labstack/echo"
+	"github.com/plouc/textree"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/renderer/html"
 	"golang.org/x/crypto/bcrypt"
+	"os"
+	"strings"
 )
 
-var(
-	md = goldmark.New(goldmark.WithRendererOptions(html.WithUnsafe()))
+var (
+	md   = goldmark.New(goldmark.WithRendererOptions(html.WithUnsafe()))
 	base = template.Must(template.ParseGlob("www/index.html"))
-) 
+)
 
-type Handler struct {
-	db *db.Queries
+// Page contains all the data displayed on the current page
+type Page struct {
+	// List of exercises
+	Exercises []string
+
+	// The main content (derived from markdown files in tasks/)
+	Body string
 }
 
-func New(e *echo.Echo, queries *db.Queries) *Handler {
+type Handler struct {
+	db   *db.Queries
+	page Page
+}
+
+func New(queries *db.Queries) *Handler {
 	return &Handler{
 		db: queries,
+		page: Page{
+			Exercises: []string{
+				"Aufgabe XX",
+				"Aufgabe YY",
+			},
+		},
 	}
+}
+
+func (k Handler) Homepage(c echo.Context) error {
+	// Contents of homepage comes from README.md file
+	taskMD, err := os.ReadFile("www/README.md")
+	if err != nil {
+		return err
+	}
+
+	// Convert local markdown files to HTML
+	var taskHTML bytes.Buffer
+	if err := md.Convert(taskMD, &taskHTML); err != nil {
+		return err
+	}
+
+	data := k.page
+	data.Body = taskHTML.String()
+
+	return c.Render(http.StatusOK, "index", data)
+}
+
+func (k Handler) TaskHandler(c echo.Context) error {
+	// Convert local markdown files to HTML
+	taskMD, err := os.ReadFile("tasks/" + c.Param("task") + "/README.md")
+	if err != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+	var taskHTML bytes.Buffer
+	if err := md.Convert(taskMD, &taskHTML); err != nil {
+		return err
+	}
+
+	//var buf bytes.Buffer
+	//if err := base.ExecuteTemplate(&buf, "index", w); err != nil {
+	//	return err
+	//}
+
+	// Replace occurrences of {{Code}} in the webpage with a custom file viewer
+	htm := fmt.Sprintf(`
+		<div class="row" style="margin-top: 3em; margin-bottom:3em">
+			<div class="col-3">
+				<div>%s</div>
+			</div>
+
+			<div class="col">
+				<div class="tabs">
+				%s
+				</div>
+			</div>
+		</div>`, treeView(c.Param("task")), codeView(c.Param("task")))
+
+	result := strings.ReplaceAll(taskHTML.String(), "{{Code}}", htm)
+
+	data := k.page
+	data.Body = result
+
+	return c.Render(http.StatusOK, "index", data)
+	//return c.HTML(http.StatusOK, result)
+}
+
+func treeView(name string) string {
+	tree, err := textree.TreeFromDir("./tasks/" + name + "/code")
+	if err != nil {
+		panic(err)
+	}
+
+	var treebuf bytes.Buffer
+	tree.Render(&treebuf, textree.NewRenderOptions())
+
+	result := treebuf.String()
+	result = strings.TrimSpace(result)
+	result = strings.ReplaceAll(result, "\n", "<br />")
+
+	return result
+}
+
+func codeView(name string) string {
+	entries, err := os.ReadDir("./tasks/" + name + "/code")
+	if err != nil {
+		panic(err)
+	}
+
+	code := ""
+	for _, e := range entries {
+		content, err := os.ReadFile("./tasks/" + name + "/code/" + e.Name())
+		if err != nil {
+			panic(err)
+		}
+
+		code += fmt.Sprintf(`
+			<input type="radio" name="tabs" id="tabone" checked="checked">
+			<label for="tabone">%s</label>
+			<div class="tab"><pre><code>%s</code></pre></div>`, e.Name(), string(content))
+	}
+
+	return code
 }
 
 func (k Handler) Username(c echo.Context) error {
@@ -37,7 +153,7 @@ func (k Handler) Username(c echo.Context) error {
 		return c.HTML(http.StatusOK, `<li class="float-right"><a href="/login">Anmelden</a></li>`)
 	}
 
-	return c.HTML(http.StatusOK, `<li class="float-right">Eingeloggt als <strong>` + cookie.Value + `</strong></li>`)
+	return c.HTML(http.StatusOK, `<li class="float-right">Eingeloggt als <strong>`+cookie.Value+`</strong></li>`)
 }
 
 func (k Handler) ValidateUsername(c echo.Context) error {
@@ -48,12 +164,12 @@ func (k Handler) ValidateUsername(c echo.Context) error {
 	if !errors.Is(err, sql.ErrNoRows) {
 		return c.HTML(http.StatusOK, `
 			<div style='color:red;'>Der Benutzername ist bereits vergeben.</div>
-			<input name="username" hx-post="/validate/name" hx-target="#username-form" hx-indicator="#ind" value=` + username + `>
+			<input name="username" hx-post="/validate/name" hx-target="#username-form" hx-indicator="#ind" value=`+username+`>
 		`)
 	}
 
 	return c.HTML(http.StatusOK, `
-		<input name="username" hx-post="/validate/name" hx-target="#username-form" hx-indicator="#ind" value=` + username + `>
+		<input name="username" hx-post="/validate/name" hx-target="#username-form" hx-indicator="#ind" value=`+username+`>
 	`)
 }
 
@@ -88,7 +204,6 @@ func (k Handler) ValidateConfirmation(c echo.Context) error {
 	`)
 }
 
-
 func (k Handler) Login(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -108,18 +223,17 @@ func (k Handler) Login(c echo.Context) error {
 	}
 
 	cookie := &http.Cookie{
-		Name:        "username",
-		Value:       username,
-		Path:        "/",
-		Expires:     time.Now().Add(24 * time.Hour),
-		Secure:      true,
-		HttpOnly:    true,
+		Name:     "username",
+		Value:    username,
+		Path:     "/",
+		Expires:  time.Now().Add(24 * time.Hour),
+		Secure:   true,
+		HttpOnly: true,
 	}
 	c.SetCookie(cookie)
 
 	return c.HTML(http.StatusOK, `<div><meta http-equiv="refresh" content="1; url=/">Erfolgreich angemeldet</div>`)
 }
-
 
 func (k Handler) Register(c echo.Context) error {
 	username := c.FormValue("username")
@@ -148,4 +262,3 @@ func (k Handler) Register(c echo.Context) error {
 
 	return c.HTML(http.StatusOK, `<span style="color:green;">Erfolgreich registriert.</span><br><a href="/login">Jetzt Anmelden</a>`)
 }
-

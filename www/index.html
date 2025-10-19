@@ -29,8 +29,9 @@
                <li>Homepage</li>
                <li><a href="#">Aufgaben ▾</a>
                   <ul>
-                     <li><a href="#">Menu 1</a></li>
-                     <li><a href="#">Menu 2</a></li>
+                     {{range .Exercises}}
+                     <li><a href="#">{{.}}</a></li>
+                     {{end}}
                   </ul>
                </li>
                <li><a href="#">Folien ▾</a>
@@ -45,7 +46,7 @@
       </div>
 
       <div style="margin-bottom: 3em">
-         {{.}}
+         {{.Body}}
          <div style="margin-top: 2em">
             <a href="#"><span>&lt;</span> Zurück zur Homepage</a>
          </div>
