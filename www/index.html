@@ -26,20 +26,15 @@
          <span style="font-size: 4em">JULIEN'S JUDGE</span>
          <nav>
             <ul>
-               <li>Homepage</li>
+               <li><a href="/">Homepage</a></li>
                <li><a href="#">Aufgaben ▾</a>
                   <ul>
                      {{range .Exercises}}
-                     <li><a href="#">{{.}}</a></li>
+                     <li><a href="{{.Link}}">{{.Name}}</a></li>
                      {{end}}
                   </ul>
                </li>
-               <li><a href="#">Folien ▾</a>
-                  <ul>
-                     <li><a href="#">Menu 1</a></li>
-                     <li><a href="#">Menu 2</a></li>
-                  </ul>
-               </li>
+               <li><a href="https://docs.google.com/presentation/d/1qj48AVlKqg2L8OF6gxvUwdZsH4xYOMvVKkDypz5N-sk/edit?usp=sharing">Folien</a></li>
                <li class="float-right" hx-post="/username" hx-trigger="load" hx-swap="outerHTML"></li>
             </ul>
          </nav>
@@ -48,7 +43,7 @@
       <div style="margin-bottom: 3em">
          {{.Body}}
          <div style="margin-top: 2em">
-            <a href="#"><span>&lt;</span> Zurück zur Homepage</a>
+            <a href="/"><span>&lt;</span> Zurück zur Homepage</a>
          </div>
          <!-- TODO: "zur nächsten Aufgabe" Navigation -->
       </div>

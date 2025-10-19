@@ -3,17 +3,16 @@ package db
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func Init(url string) (*Queries, error) {
 	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, "postgres://"+url)
+	conn, err := pgxpool.New(ctx, "postgres://"+url)
 	if err != nil {
 		return nil, fmt.Errorf("connecting: %w", err)
 	}
-	defer conn.Close(ctx)
 
 	queries := New(conn)
 
