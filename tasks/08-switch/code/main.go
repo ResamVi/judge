@@ -2,17 +2,16 @@ package main
 
 import "fmt"
 
-
 func main() {
-	fmt.Println(kartenwert("ass")) 
-	fmt.Println(kartenwert("zehn")) 
-	fmt.Println(kartenwert("drei")) 
-	fmt.Println(kartenwert("könig")) 
-	fmt.Println(kartenwert("bube")) 
-	fmt.Println(kartenwert("dame")) 
+	fmt.Println(kartenwert("ass"))
+	fmt.Println(kartenwert("zehn"))
+	fmt.Println(kartenwert("drei"))
+	fmt.Println(kartenwert("könig"))
+	fmt.Println(kartenwert("bube"))
+	fmt.Println(kartenwert("dame"))
 }
 
-// TODO: Definiere eine Funktion 'kartenwert'. 
+// TODO: Definiere eine Funktion 'kartenwert'.
 // - Die Funktion nimmt einen Parameter:
 //		- Der Name der Karte
 // - Die Funktion soll den Wert der Karte zurückgeben

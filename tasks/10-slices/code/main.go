@@ -3,17 +3,17 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println(geradeKarten()) 
-	fmt.Println(zieheKarten([]int{1,2,3}, 2)) 
-	fmt.Println(zieheKarten([]int{1,2,3,4,5}, 12)) 
-	fmt.Println(ersetzeKarte([]int{1,2,3,4,5}, 1, 10)) 
-	fmt.Println(ersetzeKarte([]int{1,2,3,4,5}, 12, 10)) 
+	fmt.Println(geradeKarten())
+	fmt.Println(zieheKarten([]int{1, 2, 3}, 2))
+	fmt.Println(zieheKarten([]int{1, 2, 3, 4, 5}, 12))
+	fmt.Println(ersetzeKarte([]int{1, 2, 3, 4, 5}, 1, 10))
+	fmt.Println(ersetzeKarte([]int{1, 2, 3, 4, 5}, 12, 10))
 }
 
 // TODO: Definiere eine Funktion "geradeKarten"
 // - Die Funktion gibt ein slice zurück von allen Karten die gerade sind
 
-// TODO: Definiere eine Funktion 'zieheKarte'. 
+// TODO: Definiere eine Funktion 'zieheKarte'.
 // - Die Funktion nimmt zwei Parameter:
 //		- Ein Stapel an Karten ([]int)
 //		- Die Position der Karte die aus dem Stapel gezogen wird (int)

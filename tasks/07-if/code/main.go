@@ -2,11 +2,10 @@ package main
 
 import "fmt"
 
-
 func main() {
-	fmt.Println(brauchtFührerschein("auto")) 
-	fmt.Println(brauchtFührerschein("fahrrad")) 
-	fmt.Println(brauchtFührerschein("lkw")) 
+	fmt.Println(brauchtFührerschein("auto"))
+	fmt.Println(brauchtFührerschein("fahrrad"))
+	fmt.Println(brauchtFührerschein("lkw"))
 
 	fmt.Println(wähleAuto("Aston Martin Valhalla", "Tesla Model 3"))
 	fmt.Println(wähleAuto("Honda Civic", "Ferrari F80"))
@@ -17,7 +16,7 @@ func main() {
 	fmt.Println(schätzeWert(1000, 15))
 }
 
-// TODO: Definiere eine Funktion 'brauchtFührerschein'. 
+// TODO: Definiere eine Funktion 'brauchtFührerschein'.
 // - Die Funktion nimmt einen Parameter:
 //		- Der Name des Fahrzeugs
 // - Die Funktion soll 'true' zurückgeben für "auto" und "lkw" und sonst 'false'
@@ -38,4 +37,3 @@ func main() {
 // - Wenn es weniger als 10 Jahre alt ist, ist der Schätzwert 70% des Originalpreises
 // - Ist das Auto älter, ist der Schätzwer 50% des Originalpreises
 // - Der Rückgabewert soll ein float64 sein
-

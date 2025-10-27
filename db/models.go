@@ -4,9 +4,26 @@
 
 package db
 
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type Exercise struct {
+	ID    string
+	Title string
+}
+
 type User struct {
 	ID       int64
 	Username string
 	Password string
+	Token    string
 	Approved bool
+}
+
+type UserSolvedExercise struct {
+	UserID     int64
+	Username   pgtype.Text
+	ExerciseID string
+	Title      pgtype.Text
 }

@@ -2,9 +2,8 @@ package main
 
 import "fmt"
 
-
 func main() {
-	fmt.Println(begrüßen("Guten Morgen", "Judge")) 
+	fmt.Println(begrüßen("Guten Morgen", "Judge"))
 	// Ergebnis: GUTEN MORGEN, Judge
 
 	fmt.Println(rahmen("Judge!", 8))
@@ -21,18 +20,18 @@ func main() {
 	// Ergebnis: JETZT KAUFEN UND 10% SPAREN
 }
 
-// TODO: Definiere eine Funktion 'begrüßen'. 
+// TODO: Definiere eine Funktion 'begrüßen'.
 // - Die Funktion nimmt zwei Parameter:
 //		- Die Grußformel
 //		- Den Namen
-// - Die Funktion soll die Grußformel in Großbuchstaben 
+// - Die Funktion soll die Grußformel in Großbuchstaben
 //	 gefolgt von einem Komma und dann gefolgt vom Namen zurückgeben
 
 // TODO: Definiere eine Funktion 'rahmen'
 // - Die Funktion nimmt zwei Parameter:
 //		- Den Namen
 //		- Die Anzahl an Sternen für den Rahmen
-// - Die Funktion soll den Namen mit einem 
+// - Die Funktion soll den Namen mit einem
 //	 Rahmen von Sternen darüber und darunter Zeichnen
 //
 
@@ -42,7 +41,7 @@ func main() {
 //   Beispiel:
 //		37 Autos können auf folgende Weise produziert werden:
 //			37 = 3 Gruppen von 10 + 7 individuelle Autos
-//			   = 3 * 95.000 + 7 * 10.000 
+//			   = 3 * 95.000 + 7 * 10.000
 //			   = 355.000
 // - Tipp: Versucht die Funktion zu finden zum Ersetzen von Zeichen in:
 //	 https://pkg.go.dev/strings

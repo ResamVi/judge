@@ -1,3 +1,5 @@
+{{Status}}
+
 # Was ist der Judge
 
 Programmieren lernt man am besten durch Praxis.
@@ -21,6 +23,12 @@ Gehe zu "Anmelden" und registriere einen Account
 
 TODO: Erklärung
 
+Bevor wir anfangen müssen wir einmal konfigurieren wer wir sind, damit unser Fortschritt an die richtige Nummer geht. 
+```
+judge configure {{Token}}
+```
+
+Danach lassen sich Übungen downloaden und hochladen.
 ```
 judge download <nummer>
 ```

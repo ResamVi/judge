@@ -3,9 +3,9 @@ package main
 import "fmt"
 
 var (
-	ritterWach = true
+	ritterWach  = true
 	schützeWach = false
-	prinzWach = true
+	prinzWach   = true
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 
 // TODO: Definiere eine Funktion 'schnellangriff'
 // - Die Funktion akzeptiert einen Parameter, ob der Wächter wach ist
-// - Die Funktion gibt 'true' zurück, wenn ein Schnellangriff gemacht werden 
+// - Die Funktion gibt 'true' zurück, wenn ein Schnellangriff gemacht werden
 //	 kann, weil der Ritter erst seine Rüstung anziehen muss wenn er aufsteht
 
 // TODO: Definiere eine Funktion 'spionieren'

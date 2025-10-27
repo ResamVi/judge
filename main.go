@@ -18,8 +18,13 @@ import (
 	"github.com/rdbell/echo-pretty-logger"
 )
 
+//go:generate go tool sqlc generate
+
 func main() {
-	url := "postgres:postgres@localhost:5432/mydb?sslmode=disable" // TODO
+	url := os.Getenv("DATABASE_URL")
+	if url == "" {
+		url = "postgres:postgres@localhost:5432/mydb?sslmode=disable"
+	}
 
 	err := migrate.DB(url)
 	if err != nil {
@@ -28,6 +33,11 @@ func main() {
 
 	queries, err := db.Init(url)
 	if err != nil {
+		panic(err)
+	}
+
+	err = os.Mkdir("submissions", 0755)
+	if err != nil && !os.IsExist(err) {
 		panic(err)
 	}
 
@@ -50,6 +60,7 @@ func main() {
 	e.GET("/tasks/:task", h.TaskHandler)
 	e.GET("/tasks/:task/code", CodeHandler)
 
+	e.POST("/submission", h.Submit)
 	e.POST("/login", h.Login)
 	e.POST("/register", h.Register)
 	e.POST("/username", h.Username)

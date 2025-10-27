@@ -7,36 +7,117 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createUser = `-- name: CreateUser :one
-INSERT INTO users (
-  username, password
+const createExercise = `-- name: CreateExercise :exec
+INSERT INTO exercises (
+    id, title
 ) VALUES (
   $1, $2
-)
-RETURNING id, username, password, approved
+) ON CONFLICT DO NOTHING
+`
+
+type CreateExerciseParams struct {
+	ID    string
+	Title string
+}
+
+func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) error {
+	_, err := q.db.Exec(ctx, createExercise, arg.ID, arg.Title)
+	return err
+}
+
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (
+  username, password, token, approved
+) VALUES (
+  $1, $2, $3, $4
+) ON CONFLICT DO NOTHING
 `
 
 type CreateUserParams struct {
 	Username string
 	Password string
+	Token    string
+	Approved bool
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.Password)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Password,
-		&i.Approved,
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.Exec(ctx, createUser,
+		arg.Username,
+		arg.Password,
+		arg.Token,
+		arg.Approved,
 	)
-	return i, err
+	return err
+}
+
+const getExercises = `-- name: GetExercises :many
+SELECT id, title FROM exercises
+ORDER BY id ASC
+`
+
+func (q *Queries) GetExercises(ctx context.Context) ([]Exercise, error) {
+	rows, err := q.db.Query(ctx, getExercises)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Exercise
+	for rows.Next() {
+		var i Exercise
+		if err := rows.Scan(&i.ID, &i.Title); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSolvers = `-- name: GetSolvers :many
+SELECT
+    u.id,
+    u.username,
+    (usex.user_id IS NOT NULL)::boolean AS solved
+FROM users u
+LEFT JOIN user_solved_exercise usex ON usex.user_id = u.id
+AND usex.exercise_id = $1
+ORDER BY u.id
+`
+
+type GetSolversRow struct {
+	ID       int64
+	Username string
+	Solved   bool
+}
+
+func (q *Queries) GetSolvers(ctx context.Context, exerciseID string) ([]GetSolversRow, error) {
+	rows, err := q.db.Query(ctx, getSolvers, exerciseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSolversRow
+	for rows.Next() {
+		var i GetSolversRow
+		if err := rows.Scan(&i.ID, &i.Username, &i.Solved); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, password, approved FROM users
+SELECT id, username, password, token, approved FROM users
 WHERE username = $1 LIMIT 1
 `
 
@@ -47,27 +128,83 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
 		&i.ID,
 		&i.Username,
 		&i.Password,
+		&i.Token,
 		&i.Approved,
 	)
 	return i, err
 }
 
-const upsertUser = `-- name: UpsertUser :exec
-INSERT INTO users (
-  username, password, approved
-) VALUES (
-  $1, $2, $3
-)
-ON CONFLICT DO NOTHING
+const getUserFromToken = `-- name: GetUserFromToken :one
+SELECT id, username, password, token, approved FROM users
+WHERE token = $1 LIMIT 1
 `
 
-type UpsertUserParams struct {
-	Username string
-	Password string
-	Approved bool
+func (q *Queries) GetUserFromToken(ctx context.Context, token string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserFromToken, token)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Token,
+		&i.Approved,
+	)
+	return i, err
 }
 
-func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) error {
-	_, err := q.db.Exec(ctx, upsertUser, arg.Username, arg.Password, arg.Approved)
+const getUsers = `-- name: GetUsers :many
+SELECT id, username, password, token, approved FROM users
+WHERE approved = true
+ORDER BY id ASC
+`
+
+func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Password,
+			&i.Token,
+			&i.Approved,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const userSolvedExercise = `-- name: UserSolvedExercise :exec
+INSERT INTO user_solved_exercise (
+    user_id, username, exercise_id, title
+) VALUES (
+    $1, $2, $3, $4
+)
+`
+
+type UserSolvedExerciseParams struct {
+	UserID     int64
+	Username   pgtype.Text
+	ExerciseID string
+	Title      pgtype.Text
+}
+
+func (q *Queries) UserSolvedExercise(ctx context.Context, arg UserSolvedExerciseParams) error {
+	_, err := q.db.Exec(ctx, userSolvedExercise,
+		arg.UserID,
+		arg.Username,
+		arg.ExerciseID,
+		arg.Title,
+	)
 	return err
 }

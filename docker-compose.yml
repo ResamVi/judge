@@ -11,6 +11,15 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=mydb
       - POSTGRES_PASSWORD=postgres
+  judge:
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgres:postgres@postgres:5432/mydb?sslmode=disable
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:

@@ -35,7 +35,7 @@ Die Aufgabe ist entworfen, um dir Übung beim Kompilieren und Ausführen von Go 
 
 1. Öffne die Eingabeaufforderung
 
-![img](/tasks/01/image.png) TODO: Besseres Bild
+![img](/tasks/01-compiler/image.png) TODO: Besseres Bild
 
 2. Navigiere zu deinem `vhs` Ordner. Dazu hier ein Beispiel, um zwischen Ordnern zu navigieren:
 

@@ -3,6 +3,7 @@ module github.com/ResamVi/judge
 go 1.24.0
 
 require (
+	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/rdbell/echo-pretty-logger v1.0.0
 )
