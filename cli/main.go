@@ -12,7 +12,8 @@ import (
 	"path/filepath"
 
 	"encoding/json"
-	"github.com/kirsle/configdir"
+	"github.com/alecthomas/kong"
+	
 )
 
 const (
@@ -22,24 +23,29 @@ const (
 
 var CLI struct {
 	Configure struct {
-		Force     bool `help:"Force removal."`
-		Recursive bool `help:"Recursively remove files."`
+		Token string `arg:"" name:"token" help:"Der Token ist auf der Homepage unter 'Wichtigsten Befehle'"`
+	} `cmd:"" name:"configure" help:"Kopiere dein Token um Code hochladen und herunterladen zu können"`
 
-		Paths []string `arg:"" name:"path" help:"Paths to remove." type:"path"`
-	} `cmd:"" help:"Kopiere dein Token aus Konfigurier "`
+	Download struct {
+		Aufgabe bool `arg:"" name:"aufgabe" help:"Nummer der Aufgabe die gedownloadet werden soll."`
+	} `cmd:"" name:"download" help:"Downloade eine Aufgabe"`
 
-	Ls struct {
-		Paths []string `arg:"" optional:"" name:"path" help:"Paths to list." type:"path"`
-	} `cmd:"" help:"List paths."`
+	Upload struct {
+		Aufgabe bool   `arg:"" name:"aufgabe" help:"Nummer der Aufgabe für die eine Lösung hochgeladen wird."`
+		Ordner  string `arg:"" name:"ordner" help:"Name des Ordners der hochgeladen werden soll" type:"existingdir"`
+	} `cmd:"" name:"upload" help:"Upload deiner Lösung für die Aufgabe"`
+
+	Review struct {
+		Aufgabe  bool   `help:"Nummer der Aufgabe für die eine Lösung hochgeladen wird."`
+		Benutzer string `help:"Nutzername der Person die Lösung hochgeladen hat"`
+	} `cmd:"" name:"review" help:"Downloade eine Aufgabe"`
 }
 
 func main() {
-	if len(os.Args) != 3 {
-		panic("need 3 arguments")
-	}
+	ctx := kong.Parse(&CLI)
 
-	switch os.Args[1] {
-	case "configure":
+	switch ctx.Command() {
+	case "configure <token>":
 		configure()
 	case "download":
 		download()
@@ -48,7 +54,7 @@ func main() {
 	case "review":
 		// Todo: downloading other submissions
 	default:
-		panic("unknown argument: " + os.Args[1])
+		panic(ctx.Command())
 	}
 }
 

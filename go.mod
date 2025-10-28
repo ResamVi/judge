@@ -3,6 +3,7 @@ module github.com/ResamVi/judge
 go 1.24.0
 
 require (
+	github.com/alecthomas/kong v1.12.1
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/rdbell/echo-pretty-logger v1.0.0
@@ -36,7 +37,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.2 // indirect
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/google/cel-go v0.24.1 // indirect
-	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/uuid v1.6.0
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
