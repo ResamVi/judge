@@ -29,8 +29,9 @@ INSERT INTO users (username, token, password, approved) VALUES ('deeeeeeeeeeeeee
 
 INSERT INTO exercises(id, title) VALUES ('01-compiler', 'Der Compiler');
 INSERT INTO exercises(id, title) VALUES ('02-hello-world', 'Das erste Programm');
-INSERT INTO exercises(id, title) VALUES ('04-booleans', 'Lasagne kochen');
-INSERT INTO exercises(id, title) VALUES ('03-funktionen', 'Rettungsaktion');
+INSERT INTO exercises(id, title) VALUES ('03-values', 'Werte ausgeben');
+INSERT INTO exercises(id, title) VALUES ('05-booleans', 'Lasagne kochen');
+INSERT INTO exercises(id, title) VALUES ('05-funktionen', 'Rettungsaktion');
 INSERT INTO exercises(id, title) VALUES ('05-mathe', 'Autofabrik');
 INSERT INTO exercises(id, title) VALUES ('06-strings', 'Willkommensnachricht');
 INSERT INTO exercises(id, title) VALUES ('07-if', 'Autokauf');

@@ -6,6 +6,7 @@ In dieser Aufgabe schreiben wir unser erstes Go Programm selber.
 
 1. Die Struktur wie jedes Programm in Go aufgebaut wird ist bekannt
 2. Wir wissen, dass Dateien für Go-Programme die Endung `.go` haben
+3. Die Funktion `fmt.Println` kennengelernt
 
 
 ## Code

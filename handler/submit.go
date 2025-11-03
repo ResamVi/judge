@@ -5,16 +5,14 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"fmt"
-	"encoding/base64"
 	"github.com/labstack/echo/v4"
 	"io"
 	"log/slog"
-	"time"
-	"archive/zip"
-	"time"
-	"fmt"
-	"bytes"
+	"net/http"
+	"os"
+	"path/fil
+	"strings"
+i
 )
 
 func (k Handler) Submit(c echo.Context) error {
