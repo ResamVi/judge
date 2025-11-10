@@ -5,34 +5,77 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/ResamVi/judge/db"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"io"
 	"log/slog"
 	"net/http"
 	"os"
-	"path/fil
+	"path/filepath"
 	"strings"
-i
+	"time"
 )
 
 func (k Handler) Submit(c echo.Context) error {
-	//token := c.Request().Header.Get("token")
-	//exercise := c.Request().Header.Get("exercise")
+	// == Unwrap user inputs ==
+	token := c.Request().Header.Get("token")
+	exercise := c.Request().Header.Get("exercise")
 
-	//user, err := k.db.GetUserFromToken(c.Request().Context(), token)
-	//if err != nil {
-	//	slog.Error("could not find user with token", "token", token, "err", err)
-	//	return c.String(http.StatusNotFound, err.Error())
-	//}
+	user, err := k.db.GetUserFromToken(c.Request().Context(), token)
+	if err != nil {
+		slog.Error("could not find user with token", "token", token, "err", err)
+		return c.String(http.StatusNotFound, err.Error())
+	}
 
-	// Decode base64
 	data, err := io.ReadAll(base64.NewDecoder(base64.StdEncoding, c.Request().Body))
 	if err != nil {
 		slog.Error("bad base64", "error", err.Error())
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	// Destination path
+	readerAt := bytes.NewReader(data)
+	zr, err := zip.NewReader(readerAt, int64(len(data)))
+	if err != nil {
+		slog.Error("bad zip data", "error", err.Error())
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	// == Store the code in database ==
+	code := ""
+	for _, f := range zr.File {
+		code += fmt.Sprintf("\n=== %s ===\n", f.Name)
+
+		rc, err := f.Open()
+		if err != nil {
+			slog.Error(err.Error())
+			continue
+		}
+
+		// Copy file contents to stdout
+		b, err := io.ReadAll(rc)
+		if err != nil {
+			slog.Error(err.Error())
+			continue
+		}
+		code += string(b)
+		rc.Close()
+	}
+
+	err = k.db.CreateSubmission(c.Request().Context(), db.CreateSubmissionParams{
+		UserID:     user.ID,
+		ExerciseID: exercise,
+		Code: pgtype.Text{
+			String: code,
+			Valid:  true,
+		},
+	})
+	if err != nil {
+		slog.Error("failed to create submission", "userId", user.ID, "exercise", exercise, "error", err.Error())
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	// == Store code locally for execution ==
 	destDir := filepath.Join("submissions", time.Now().Format("2006-01-02T15-04"))
 
 	if err := os.MkdirAll(destDir, os.ModePerm); err != nil {

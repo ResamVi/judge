@@ -2,7 +2,6 @@
 SELECT * FROM users
 WHERE username = $1 LIMIT 1;
 
-
 -- name: GetUserFromToken :one
 SELECT * FROM users
 WHERE token = $1 LIMIT 1;
@@ -39,6 +38,14 @@ INSERT INTO exercises (
 ) VALUES (
   $1, $2
 ) ON CONFLICT DO NOTHING;
+
+-- name: CreateSubmission :exec
+INSERT INTO submissions (
+    user_id, exercise_id, code
+) VALUES (
+     $1, $2, $3
+) ON CONFLICT (user_id, exercise_id) DO UPDATE
+SET code = EXCLUDED.code;
 
 -- name: UserSolvedExercise :exec
 INSERT INTO user_solved_exercise (

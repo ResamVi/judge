@@ -13,6 +13,12 @@ type Exercise struct {
 	Title string
 }
 
+type Submission struct {
+	UserID     int64
+	ExerciseID string
+	Code       pgtype.Text
+}
+
 type User struct {
 	ID       int64
 	Username string

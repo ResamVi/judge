@@ -43,10 +43,10 @@ func (k Handler) Homepage(c echo.Context) error {
 			slog.Error("failed to get user", "error", err, "username", cookie.Value)
 			return err
 		}
-		result = strings.ReplaceAll(taskHTML.String(), "{{Token}}", user.Token)
+		result = strings.ReplaceAll(result, "{{Token}}", user.Token)
 	} else {
 		result = strings.ReplaceAll(taskHTML.String(), "{{Status}}", "")
-		result = strings.ReplaceAll(taskHTML.String(), "{{Token}}", "<my-token>")
+		result = strings.ReplaceAll(result, "{{Token}}", "<my-token>")
 	}
 
 	data := k.page

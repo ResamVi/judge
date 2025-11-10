@@ -29,6 +29,26 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 	return err
 }
 
+const createSubmission = `-- name: CreateSubmission :exec
+INSERT INTO submissions (
+    user_id, exercise_id, code
+) VALUES (
+     $1, $2, $3
+) ON CONFLICT (user_id, exercise_id) DO UPDATE
+SET code = EXCLUDED.code
+`
+
+type CreateSubmissionParams struct {
+	UserID     int64
+	ExerciseID string
+	Code       pgtype.Text
+}
+
+func (q *Queries) CreateSubmission(ctx context.Context, arg CreateSubmissionParams) error {
+	_, err := q.db.Exec(ctx, createSubmission, arg.UserID, arg.ExerciseID, arg.Code)
+	return err
+}
+
 const createUser = `-- name: CreateUser :exec
 INSERT INTO users (
   username, password, token, approved

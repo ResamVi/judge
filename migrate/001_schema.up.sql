@@ -20,6 +20,13 @@ CREATE TABLE user_solved_exercise (
     PRIMARY KEY (user_id, exercise_id)
 );
 
+CREATE TABLE submissions (
+    user_id     BIGSERIAL   REFERENCES users(id),
+    exercise_id char(24)    REFERENCES exercises(id),
+    code        text,
+    PRIMARY KEY (user_id, exercise_id)
+);
+
 ------ Test data ------
 
 INSERT INTO users (username, token, password, approved) VALUES ('admin', 'abc0', '$2a$10$aIX0H/Wpntz7VAHJ3rWs1OKlMPVStaG1FZn25hdsvdnLmNq2/SITy', true);
