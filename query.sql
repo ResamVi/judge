@@ -25,6 +25,11 @@ LEFT JOIN user_solved_exercise usex ON usex.user_id = u.id
 AND usex.exercise_id = $1
 ORDER BY u.id;
 
+
+-- name: GetCode :one
+SELECT code FROM submissions
+WHERE user_id = $1 AND exercise_id = $2;
+
 -- name: CreateUser :exec
 INSERT INTO users (
   username, password, token, approved

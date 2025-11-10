@@ -44,7 +44,7 @@ func (k Handler) Submit(c echo.Context) error {
 	// == Store the code in database ==
 	code := ""
 	for _, f := range zr.File {
-		code += fmt.Sprintf("\n=== %s ===\n", f.Name)
+		code += fmt.Sprintf("\n// === File: %s ===\n", f.Name)
 
 		rc, err := f.Open()
 		if err != nil {

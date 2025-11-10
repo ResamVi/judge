@@ -74,6 +74,23 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const getCode = `-- name: GetCode :one
+SELECT code FROM submissions
+WHERE user_id = $1 AND exercise_id = $2
+`
+
+type GetCodeParams struct {
+	UserID     int64
+	ExerciseID string
+}
+
+func (q *Queries) GetCode(ctx context.Context, arg GetCodeParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getCode, arg.UserID, arg.ExerciseID)
+	var code pgtype.Text
+	err := row.Scan(&code)
+	return code, err
+}
+
 const getExercises = `-- name: GetExercises :many
 SELECT id, title FROM exercises
 ORDER BY id ASC

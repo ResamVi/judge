@@ -60,6 +60,8 @@ func main() {
 	e.GET("/tasks/:task", h.TaskHandler)
 	e.GET("/tasks/:task/code", CodeHandler)
 
+	e.GET("/submission/:task", h.Submission)
+
 	e.POST("/submission", h.Submit)
 	e.POST("/login", h.Login)
 	e.POST("/register", h.Register)

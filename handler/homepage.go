@@ -85,9 +85,10 @@ func (k Handler) status(ctx context.Context) (string, error) {
 
 		for _, solver := range solvers {
 			if solver.Solved {
-				exercisesHTML += fmt.Sprintf("<td>✔️</td>")
+				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s">✔️</a></td>`, exercise.ID)
 			} else {
-				exercisesHTML += fmt.Sprintf("<td>❌</td>")
+				exercisesHTML += fmt.Sprintf("<td> </td>")
+				// exercisesHTML += fmt.Sprintf("<td>❌</td>")
 			}
 		}
 		exercisesHTML += "</tr>"
