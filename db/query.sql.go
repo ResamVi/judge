@@ -31,21 +31,27 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 
 const createSubmission = `-- name: CreateSubmission :exec
 INSERT INTO submissions (
-    user_id, exercise_id, code
+    user_id, exercise_id, code, output
 ) VALUES (
-     $1, $2, $3
+     $1, $2, $3, $4
 ) ON CONFLICT (user_id, exercise_id) DO UPDATE
-SET code = EXCLUDED.code
+SET code = EXCLUDED.code, output = EXCLUDED.output
 `
 
 type CreateSubmissionParams struct {
 	UserID     int64
 	ExerciseID string
 	Code       pgtype.Text
+	Output     pgtype.Text
 }
 
 func (q *Queries) CreateSubmission(ctx context.Context, arg CreateSubmissionParams) error {
-	_, err := q.db.Exec(ctx, createSubmission, arg.UserID, arg.ExerciseID, arg.Code)
+	_, err := q.db.Exec(ctx, createSubmission,
+		arg.UserID,
+		arg.ExerciseID,
+		arg.Code,
+		arg.Output,
+	)
 	return err
 }
 
@@ -72,23 +78,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 		arg.Approved,
 	)
 	return err
-}
-
-const getCode = `-- name: GetCode :one
-SELECT code FROM submissions
-WHERE user_id = $1 AND exercise_id = $2
-`
-
-type GetCodeParams struct {
-	UserID     int64
-	ExerciseID string
-}
-
-func (q *Queries) GetCode(ctx context.Context, arg GetCodeParams) (pgtype.Text, error) {
-	row := q.db.QueryRow(ctx, getCode, arg.UserID, arg.ExerciseID)
-	var code pgtype.Text
-	err := row.Scan(&code)
-	return code, err
 }
 
 const getExercises = `-- name: GetExercises :many
@@ -151,6 +140,28 @@ func (q *Queries) GetSolvers(ctx context.Context, exerciseID string) ([]GetSolve
 		return nil, err
 	}
 	return items, nil
+}
+
+const getSubmission = `-- name: GetSubmission :one
+SELECT code, output FROM submissions
+WHERE user_id = $1 AND exercise_id = $2
+`
+
+type GetSubmissionParams struct {
+	UserID     int64
+	ExerciseID string
+}
+
+type GetSubmissionRow struct {
+	Code   pgtype.Text
+	Output pgtype.Text
+}
+
+func (q *Queries) GetSubmission(ctx context.Context, arg GetSubmissionParams) (GetSubmissionRow, error) {
+	row := q.db.QueryRow(ctx, getSubmission, arg.UserID, arg.ExerciseID)
+	var i GetSubmissionRow
+	err := row.Scan(&i.Code, &i.Output)
+	return i, err
 }
 
 const getUser = `-- name: GetUser :one

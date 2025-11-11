@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -23,19 +22,17 @@ func (k Handler) Submission(c echo.Context) error {
 	}
 
 	task := c.Param("task")
-	code, err := k.db.GetCode(c.Request().Context(), db.GetCodeParams{
+	subm, err := k.db.GetSubmission(c.Request().Context(), db.GetSubmissionParams{
 		UserID:     user.ID,
 		ExerciseID: task,
 	})
-	if err != nil || !code.Valid {
-		slog.Error("could not find exercise for user", "task", task, "user", user.Username)
+	if err != nil || !subm.Code.Valid {
+		slog.Error("could not find submission for user", "task", task, "user", user.Username)
 		return c.String(http.StatusNotFound, err.Error())
 	}
 
-	fmt.Println(code.String)
-
 	data := k.page
-	data.Body = fmt.Sprintf("%s%s%s", "<pre><code>",code.String,"</code></pre>")
+	data.Body = "<h2>Code</h2><pre><code>" + subm.Code.String + "</code></pre><h2>Output</h2><pre><code>" + subm.Output.String + "</code></pre>"
 
 	return c.Render(http.StatusOK, "index", data)
 }

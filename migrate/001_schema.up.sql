@@ -24,6 +24,7 @@ CREATE TABLE submissions (
     user_id     BIGSERIAL   REFERENCES users(id),
     exercise_id char(24)    REFERENCES exercises(id),
     code        text,
+    output      text,
     PRIMARY KEY (user_id, exercise_id)
 );
 

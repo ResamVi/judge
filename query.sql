@@ -25,10 +25,11 @@ LEFT JOIN user_solved_exercise usex ON usex.user_id = u.id
 AND usex.exercise_id = $1
 ORDER BY u.id;
 
-
--- name: GetCode :one
-SELECT code FROM submissions
+-- name: GetSubmission :one
+SELECT code, output FROM submissions
 WHERE user_id = $1 AND exercise_id = $2;
+
+
 
 -- name: CreateUser :exec
 INSERT INTO users (
@@ -46,11 +47,11 @@ INSERT INTO exercises (
 
 -- name: CreateSubmission :exec
 INSERT INTO submissions (
-    user_id, exercise_id, code
+    user_id, exercise_id, code, output
 ) VALUES (
-     $1, $2, $3
+     $1, $2, $3, $4
 ) ON CONFLICT (user_id, exercise_id) DO UPDATE
-SET code = EXCLUDED.code;
+SET code = EXCLUDED.code, output = EXCLUDED.output;
 
 -- name: UserSolvedExercise :exec
 INSERT INTO user_solved_exercise (

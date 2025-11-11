@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -62,14 +63,6 @@ func (k Handler) Submit(c echo.Context) error {
 		rc.Close()
 	}
 
-	err = k.db.CreateSubmission(c.Request().Context(), db.CreateSubmissionParams{
-		UserID:     user.ID,
-		ExerciseID: exercise,
-		Code: pgtype.Text{
-			String: code,
-			Valid:  true,
-		},
-	})
 	if err != nil {
 		slog.Error("failed to create submission", "userId", user.ID, "exercise", exercise, "error", err.Error())
 		return c.String(http.StatusBadRequest, err.Error())
@@ -87,6 +80,33 @@ func (k Handler) Submit(c echo.Context) error {
 		slog.Error("unzip failed", "error", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+
+	// == Build & run code ==
+	runCmd := exec.Command("go", "run", destDir+"/main.go")
+
+	var buildStderr, output bytes.Buffer
+	runCmd.Stderr = &buildStderr
+	runCmd.Stdout = &output
+
+	if err := runCmd.Run(); err != nil {
+		fmt.Printf("Build failed:\n%s\n", buildStderr.String())
+		os.Exit(1)
+	}
+
+	fmt.Println(output.String())
+
+	err = k.db.CreateSubmission(c.Request().Context(), db.CreateSubmissionParams{
+		UserID:     user.ID,
+		ExerciseID: exercise,
+		Code: pgtype.Text{
+			String: code,
+			Valid:  true,
+		},
+		Output: pgtype.Text{
+			String: output.String(),
+			Valid:  true,
+		},
+	})
 
 	return c.String(http.StatusOK, ":)")
 }

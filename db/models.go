@@ -17,6 +17,7 @@ type Submission struct {
 	UserID     int64
 	ExerciseID string
 	Code       pgtype.Text
+	Output     pgtype.Text
 }
 
 type User struct {
