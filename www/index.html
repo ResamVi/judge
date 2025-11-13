@@ -27,6 +27,8 @@
          <nav>
             <ul>
                <li><a href="/">Homepage</a></li>
+               <li><a href="https://docs.google.com/presentation/d/1qj48AVlKqg2L8OF6gxvUwdZsH4xYOMvVKkDypz5N-sk/edit?usp=sharing">Folien</a></li>
+               <li><a href="/token">Token</a></li>
                <li><a href="#">Aufgaben ▾</a>
                   <ul>
                      {{range .Exercises}}
@@ -34,7 +36,8 @@
                      {{end}}
                   </ul>
                </li>
-               <li><a href="https://docs.google.com/presentation/d/1qj48AVlKqg2L8OF6gxvUwdZsH4xYOMvVKkDypz5N-sk/edit?usp=sharing">Folien</a></li>
+
+               <!-- Eingeloggt sein -->
                <li class="float-right" hx-post="/username" hx-trigger="load" hx-swap="outerHTML"></li>
             </ul>
          </nav>

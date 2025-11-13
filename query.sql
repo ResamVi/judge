@@ -1,10 +1,14 @@
 -- name: GetUser :one
 SELECT * FROM users
-WHERE username = $1 LIMIT 1;
+WHERE username = $1;
+
+-- name: GetUserFromId :one
+SELECT * FROM users
+WHERE id = $1;
 
 -- name: GetUserFromToken :one
 SELECT * FROM users
-WHERE token = $1 LIMIT 1;
+WHERE token = $1;
 
 -- name: GetUsers :many
 SELECT * FROM users

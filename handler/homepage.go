@@ -46,7 +46,7 @@ func (k Handler) Homepage(c echo.Context) error {
 		result = strings.ReplaceAll(result, "{{Token}}", user.Token)
 	} else {
 		result = strings.ReplaceAll(taskHTML.String(), "{{Status}}", "")
-		result = strings.ReplaceAll(result, "{{Token}}", "<my-token>")
+		result = strings.ReplaceAll(result, "{{Token}}", "<Ein Token wird hier sichtbar sein sobald du dich eingeloggt hast>")
 	}
 
 	data := k.page
@@ -85,7 +85,7 @@ func (k Handler) status(ctx context.Context) (string, error) {
 
 		for _, solver := range solvers {
 			if solver.Solved {
-				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s">✔️</a></td>`, exercise.ID)
+				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">✔️</a></td>`, exercise.ID, solver.ID)
 			} else {
 				exercisesHTML += fmt.Sprintf("<td> </td>")
 				// exercisesHTML += fmt.Sprintf("<td>❌</td>")

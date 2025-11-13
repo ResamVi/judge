@@ -82,6 +82,7 @@ func (k Handler) Submit(c echo.Context) error {
 	}
 
 	// == Build & run code ==
+	// IMPORTANT TODO: timeout for command
 	runCmd := exec.Command("go", "run", destDir+"/main.go")
 
 	var buildStderr, output bytes.Buffer
@@ -90,10 +91,8 @@ func (k Handler) Submit(c echo.Context) error {
 
 	if err := runCmd.Run(); err != nil {
 		fmt.Printf("Build failed:\n%s\n", buildStderr.String())
-		os.Exit(1)
+		output = buildStderr
 	}
-
-	fmt.Println(output.String())
 
 	err = k.db.CreateSubmission(c.Request().Context(), db.CreateSubmissionParams{
 		UserID:     user.ID,
@@ -108,7 +107,13 @@ func (k Handler) Submit(c echo.Context) error {
 		},
 	})
 
-	return c.String(http.StatusOK, ":)")
+	evaluate(code, output.String())
+
+	return c.NoContent(http.StatusOK)
+}
+
+func evaluate(code string, s string) {
+
 }
 
 // unzipBytes extracts a zip-from-memory into destDir.

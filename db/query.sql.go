@@ -166,7 +166,7 @@ func (q *Queries) GetSubmission(ctx context.Context, arg GetSubmissionParams) (G
 
 const getUser = `-- name: GetUser :one
 SELECT id, username, password, token, approved FROM users
-WHERE username = $1 LIMIT 1
+WHERE username = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
@@ -182,9 +182,27 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
 	return i, err
 }
 
+const getUserFromId = `-- name: GetUserFromId :one
+SELECT id, username, password, token, approved FROM users
+WHERE id = $1
+`
+
+func (q *Queries) GetUserFromId(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRow(ctx, getUserFromId, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Token,
+		&i.Approved,
+	)
+	return i, err
+}
+
 const getUserFromToken = `-- name: GetUserFromToken :one
 SELECT id, username, password, token, approved FROM users
-WHERE token = $1 LIMIT 1
+WHERE token = $1
 `
 
 func (q *Queries) GetUserFromToken(ctx context.Context, token string) (User, error) {

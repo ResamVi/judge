@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 	"os"
 )
 
-func Init(url string) (*Queries, error) {
+func Init(url string, adminPassword string) (*Queries, error) {
 	ctx := context.Background()
 	conn, err := pgxpool.New(ctx, "postgres://"+url)
 	if err != nil {
@@ -19,7 +20,7 @@ func Init(url string) (*Queries, error) {
 	queries := New(conn)
 
 	// Initialize Admin
-	encrypted, err := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost) // TODO: lol
+	encrypted, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("generating admin password: %w", err)
 	}
@@ -27,7 +28,7 @@ func Init(url string) (*Queries, error) {
 	err = queries.CreateUser(ctx, CreateUserParams{
 		Username: "julienministrator",
 		Password: string(encrypted),
-		Token:    "abc",
+		Token:    uuid.New().String(),
 		Approved: true,
 	})
 	if err != nil {

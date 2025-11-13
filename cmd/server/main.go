@@ -26,12 +26,22 @@ func main() {
 		url = "postgres:postgres@localhost:5432/mydb?sslmode=disable"
 	}
 
+	password := os.Getenv("ADMIN_PASSWORD")
+	if password == "" {
+		password = "admin123"
+	}
+
+	environment := os.Getenv("ENV")
+	if environment == "" {
+		environment = "development"
+	}
+
 	err := migrate.DB(url)
 	if err != nil {
 		panic(err)
 	}
 
-	queries, err := db.Init(url)
+	queries, err := db.Init(url, password)
 	if err != nil {
 		panic(err)
 	}
@@ -48,7 +58,7 @@ func main() {
 		templates: template.Must(template.ParseGlob("www/index.html")),
 	}
 
-	h, err := handler.New(queries, os.Getenv("ENV"))
+	h, err := handler.New(queries, environment)
 	if err != nil {
 		panic(err)
 	}
@@ -56,16 +66,16 @@ func main() {
 	e.GET("/", h.Homepage)
 	e.GET("/login", h.LoginView)
 	e.GET("/register", h.RegisterView)
-
+	e.GET("/token", h.Token)
 	e.GET("/tasks/:task", h.TaskHandler)
 	e.GET("/tasks/:task/code", CodeHandler)
-
-	e.GET("/submission/:task", h.Submission)
+	e.GET("/submission/:task/:user", h.Submission)
 
 	e.POST("/submission", h.Submit)
 	e.POST("/login", h.Login)
 	e.POST("/register", h.Register)
 	e.POST("/username", h.Username)
+	e.POST("/validate/token", h.ValidateToken)
 	e.POST("/validate/name", h.ValidateUsername)
 	e.POST("/validate/password", h.ValidatePassword)
 	e.POST("/validate/confirm", h.ValidateConfirmation)

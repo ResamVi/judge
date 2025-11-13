@@ -5,34 +5,14 @@
 Programmieren lernt man am besten durch Praxis.
 Mit dem *Judge* lassen sich Aufgaben herunterladen, bearbeiten und wieder zur Benotung hochladen. Es zeigt dir deinen Lernfortschritt für den Kurs. 
 
-## Wie fängt es an
+## Ablauf
 
-Gehe zu "Anmelden" und registriere einen Account
+1. [Registriere](/register) einen Account und lasse ihn dir von Julien aktiveren
+2. Mit deinen Login-Daten [loggst du dich ein](/login)
+3. Um anzufangen muss der [Go Compiler](https://go.dev/dl/) auf dem Computer installiert sein
+4. Für die Kommunikation mit dem Judge installieren wir lokal den Judge mit folgendem Befehl:
 
-
-## Was muss installiert werden
-
-1. Als Voraussetzung muss Go auf dem Computer installiert sein
-
-
-
-2. Für die Kommunikation mit dem Judge installieren wir ein Go-Programm
-
-
-## Wichtigsten Befehle
-
-TODO: Erklärung
-
-Bevor wir anfangen müssen wir einmal konfigurieren wer wir sind, damit unser Fortschritt an die richtige Nummer geht. 
+```bash
+go install github.com/ResamVi/judge/cmd/cli@latest
 ```
-judge configure {{Token}}
-```
-
-Danach lassen sich Übungen downloaden und hochladen.
-```
-judge download <nummer>
-```
-
-```
-judge upload <nummer>
-```
+5. Führe den Judge aus und kopiere deinen [Token](/token) in das Eingabefeld
