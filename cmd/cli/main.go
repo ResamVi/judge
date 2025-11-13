@@ -2,14 +2,10 @@ package main
 
 import (
 	"archive/zip"
-	"bytes"
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
-
 	"github.com/ResamVi/judge/cli"
 	tea "github.com/charmbracelet/bubbletea"
+	"io"
 )
 
 func main() {
@@ -20,42 +16,6 @@ func main() {
 }
 
 // -----------------------------------------------------------------------------
-func upload(aufgabe string, ordner string) {
-	//token := loadConfig()
-	//
-	//if _, err := os.Stat(ordner); os.IsNotExist(err) {
-	//	panic("folder does not exist: " + ordner) // TODO: NO panics
-	//}
-	//
-	//// 1. Zip the folder
-	//zipBytes, err := zipDirectory(ordner)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//// 2. Base64-encode zip
-	//b64 := base64.StdEncoding.EncodeToString(zipBytes)
-	//
-	//// 4. POST it
-	//req, err := http.NewRequest(http.MethodPost, urlSubmit, bytes.NewReader([]byte(b64)))
-	//if err != nil {
-	//	panic(err)
-	//}
-	//req.Header.Set("token", token)
-	//req.Header.Set("exercise", aufgabe)
-	//req.Header.Set("Content-Type", "text/plain")
-	//
-	//resp, err := http.DefaultClient.Do(req)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//defer resp.Body.Close()
-	//
-	//_, err = io.Copy(os.Stdout, resp.Body)
-	//if err != nil {
-	//	panic(err)
-	//}
-}
 
 func download(aufgabe string) {
 	//token := loadConfig()
@@ -111,67 +71,4 @@ func readZipFile(zf *zip.File) ([]byte, error) {
 	}
 	defer f.Close()
 	return io.ReadAll(f)
-}
-
-// zipDirectory walks dirPath and writes a .zip (in-memory) with full structure.
-// Returns the raw bytes of the zip file.
-func zipDirectory(dirPath string) ([]byte, error) {
-	buf := new(bytes.Buffer)
-	zipWriter := zip.NewWriter(buf)
-
-	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-
-		// Build the path inside the zip (relative to dirPath)
-		relPath, err := filepath.Rel(dirPath, path)
-		if err != nil {
-			return err
-		}
-
-		// Skip the root itself ("."), but still include its children
-		if relPath == "." {
-			return nil
-		}
-
-		// Directories in zip need a trailing slash
-		if info.IsDir() {
-			_, err := zipWriter.Create(relPath + "/")
-			return err
-		}
-
-		// It's a file: create header, copy contents
-		fileHeader, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-		fileHeader.Name = relPath
-		fileHeader.Method = zip.Deflate
-
-		writer, err := zipWriter.CreateHeader(fileHeader)
-		if err != nil {
-			return err
-		}
-
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		_, err = io.Copy(writer, f)
-		return err
-	})
-
-	if err != nil {
-		zipWriter.Close()
-		return nil, err
-	}
-
-	if err := zipWriter.Close(); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
 }

@@ -34,7 +34,7 @@ func viewAuthenticate(m Model) string {
 	tpl += subtleStyle.Render("Dein Token ist hier: ") + hyperlink("https://judge.resamvi.io/token", "https://judge.resamvi.io/token")
 	tpl += subtleStyle.Render("\nstrg+c: beenden")
 
-	return fmt.Sprintf(tpl, m.TextInput.View())
+	return fmt.Sprintf(tpl, m.TokenInput.View())
 }
 
 func updateAuthenticate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
@@ -44,7 +44,7 @@ func updateAuthenticate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	m.Spinner, cmd = m.Spinner.Update(msg)
 	cmds = append(cmds, cmd)
 
-	m.TextInput, cmd = m.TextInput.Update(msg)
+	m.TokenInput, cmd = m.TokenInput.Update(msg)
 	cmds = append(cmds, cmd)
 
 	switch msg := msg.(type) {
@@ -56,23 +56,23 @@ func updateAuthenticate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			}
 
 			m.Validating = true
-			m.Token = m.TextInput.Value()
-			m.TextInput.Blur()
+			m.Token = m.TokenInput.Value()
+			m.TokenInput.Blur()
 
 			cmds = append(cmds,
 				m.Spinner.Tick,
-				validateCmd(m.JudgeURL, m.TextInput.Value()),
+				validateCmd(m.JudgeURL, m.TokenInput.Value()),
 			)
 		}
 	case validationResult:
+		m.Validating = false
+		m.ErrorMessage = msg.Error
+		m.TokenInput.Focus()
+
 		if msg.Error == "" {
 			m.Page++
 			return m, nil
 		}
-
-		m.Validating = false
-		m.ErrorMessage = msg.Error
-		m.TextInput.Focus()
 	}
 
 	return m, tea.Batch(cmds...)
@@ -116,7 +116,7 @@ func validateToken(url, token string) string {
 		}
 		defer fh.Close()
 
-		config := Config{}
+		config := Config{Token: token}
 		err = json.NewEncoder(fh).Encode(&config)
 		if err != nil {
 			return "Encode: " + err.Error()

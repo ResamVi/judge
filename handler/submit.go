@@ -63,11 +63,6 @@ func (k Handler) Submit(c echo.Context) error {
 		rc.Close()
 	}
 
-	if err != nil {
-		slog.Error("failed to create submission", "userId", user.ID, "exercise", exercise, "error", err.Error())
-		return c.String(http.StatusBadRequest, err.Error())
-	}
-
 	// == Store code locally for execution ==
 	destDir := filepath.Join("submissions", time.Now().Format("2006-01-02T15-04"))
 
@@ -105,9 +100,16 @@ func (k Handler) Submit(c echo.Context) error {
 			String: output.String(),
 			Valid:  true,
 		},
+		// TODO: Increase attempt count
 	})
+	if err != nil {
+		slog.Error("failed to create submission", "userId", user.ID, "exercise", exercise, "error", err.Error())
+		return c.String(http.StatusBadRequest, err.Error())
+	}
 
 	evaluate(code, output.String())
+
+	// TODO: Only keep 20 most recent submissions
 
 	return c.NoContent(http.StatusOK)
 }

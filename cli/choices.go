@@ -12,7 +12,7 @@ func viewChoices(m Model) string {
 	tpl += "%s\n\n"
 	tpl += subtleStyle.Render("up/down: auswählen") + dotStyle +
 		subtleStyle.Render("enter: bestätigen") + dotStyle +
-		subtleStyle.Render("esc: beenden")
+		subtleStyle.Render("strg+c: beenden")
 
 	choices := fmt.Sprintf(
 		"%s\n%s\n%s",
@@ -39,7 +39,7 @@ func updateChoices(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 				m.Choice = 0
 			}
 		case "enter":
-			m.Chosen = true
+			m.Page++
 			return m, frame()
 		}
 	}

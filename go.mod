@@ -39,6 +39,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/plouc/gosnap v0.0.0-20180714070049-61403c2f226e // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/time v0.5.0 // indirect
