@@ -11,6 +11,13 @@ import (
 	"strings"
 )
 
+// TODO: should be part of grading (mid)
+const (
+	NotAttempted = 0
+	Attempted    = 1
+	Solved       = 2
+)
+
 func Init(url string, adminPassword string, environment string) (*Queries, error) {
 	ctx := context.Background()
 	conn, err := pgxpool.New(ctx, "postgres://"+url)
@@ -76,16 +83,15 @@ func Init(url string, adminPassword string, environment string) (*Queries, error
 	//	return nil, fmt.Errorf("exercises in fs: %d exercises in code: %d", len(entries), len(handler.Exercises))
 	//}
 
-	// Testdaten
-	err = testData(ctx, queries)
+	err = initializeTestdata(ctx, queries)
 	if err != nil {
-		return nil, fmt.Errorf("could not initialize testData: %w", err)
+		return nil, fmt.Errorf("could not initialize testdata: %w", err)
 	}
 
 	return queries, nil
 }
 
-func testData(ctx context.Context, queries *Queries) error {
+func initializeTestdata(ctx context.Context, queries *Queries) error {
 	err := queries.CreateUser(ctx, CreateUserParams{
 		Username: "lou",
 		Password: "$2a$10$aIX0H/Wpntz7VAHJ3rWs1OKlMPVStaG1FZn25hdsvdnLmNq2/SITy",
@@ -105,24 +111,28 @@ func testData(ctx context.Context, queries *Queries) error {
 	if err != nil {
 		return fmt.Errorf("failed creating anna: %w", err)
 	}
-	//err = queries.UserSolvedExercise(ctx, UserSolvedExerciseParams{
-	//	UserID:     2,
-	//	Username:   "lou",
-	//	ExerciseID: "01-compiler",
-	//	Title:      "Der Compiler",
-	//})
-	//if err != nil {
-	//	return fmt.Errorf("failed creating lou solving: %w", err)
-	//}
-	//err = queries.UserSolvedExercise(ctx, UserSolvedExerciseParams{
-	//	UserID:     3,
-	//	Username:   "anna",
-	//	ExerciseID: "02-hello-world",
-	//	Title:      "Das erste Programm",
-	//})
-	//if err != nil {
-	//	return fmt.Errorf("failed creating anna solving: %w", err)
-	//}
+	err = queries.CreateSubmission(ctx, CreateSubmissionParams{
+		UserID:     1,
+		ExerciseID: "01-compiler",
+		Code:       "package main",
+		Output:     "Hello World!",
+		Evaluation: "❌, Ist noch nicht am funktionieren",
+		Solved:     Attempted,
+	})
+	if err != nil {
+		return fmt.Errorf("failed creating lou solving: %w", err)
+	}
+	err = queries.CreateSubmission(ctx, CreateSubmissionParams{
+		UserID:     2,
+		ExerciseID: "01-compiler",
+		Code:       "package main\n\nfunc main() {\n\tfmt.Println(\"Hello World!\")\n}",
+		Output:     "Hello World!",
+		Evaluation: "✅ Ist am funktionieren",
+		Solved:     Solved,
+	})
+	if err != nil {
+		return fmt.Errorf("failed creating anna solving: %w", err)
+	}
 
 	return nil
 }

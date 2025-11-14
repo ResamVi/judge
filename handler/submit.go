@@ -96,7 +96,7 @@ func (k Handler) Submit(c echo.Context) error {
 		Code:       code,
 		Output:     output.String(),
 		Evaluation: evaluation,
-		Solved:     solved,
+		Solved:     int32(solved),
 	})
 	if err != nil {
 		slog.Error("failed to create submission", "userId", user.ID, "exercise", exercise, "error", err.Error())
@@ -132,19 +132,19 @@ var Grading = map[string]Exercise{
 	},
 }
 
-func gradeSubmission(exercise string, code string, output string) (string, bool) {
+func gradeSubmission(exercise string, code string, output string) (string, int) {
 	criteria, ok := Grading[exercise]
 	if !ok {
-		return "Unbekannt: " + exercise, false
+		return "Unbekannt: " + exercise, db.NotAttempted
 	}
 
 	evaluation := ""
-	solved := true
+	solved := db.Solved
 
 	for _, fn := range criteria.Criteria {
 		comment, valid := fn.Valid(code, output)
 		if !valid {
-			solved = false
+			solved = db.Attempted
 		}
 		evaluation += comment + "<br>"
 	}

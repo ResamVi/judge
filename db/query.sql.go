@@ -46,7 +46,7 @@ type CreateSubmissionParams struct {
 	Code       string
 	Output     string
 	Evaluation string
-	Solved     bool
+	Solved     int32
 }
 
 func (q *Queries) CreateSubmission(ctx context.Context, arg CreateSubmissionParams) error {
@@ -111,33 +111,32 @@ func (q *Queries) GetExercises(ctx context.Context) ([]Exercise, error) {
 	return items, nil
 }
 
-const getSolvers = `-- name: GetSolvers :many
+const getStatus = `-- name: GetStatus :many
 SELECT
-    u.id,
-    u.username,
-    (usex.user_id IS NOT NULL)::boolean AS solved
+    u.id AS user_id,
+    COALESCE(s.solved, 0) AS solved
 FROM users u
-LEFT JOIN solved usex ON usex.user_id = u.id
-AND usex.exercise_id = $1
-ORDER BY u.id
+    LEFT JOIN submissions s
+    ON s.user_id = u.id
+    AND s.exercise_id = $1
+ORDER BY u.id ASC
 `
 
-type GetSolversRow struct {
-	ID       int64
-	Username string
-	Solved   bool
+type GetStatusRow struct {
+	UserID int64
+	Solved int32
 }
 
-func (q *Queries) GetSolvers(ctx context.Context, exerciseID string) ([]GetSolversRow, error) {
-	rows, err := q.db.Query(ctx, getSolvers, exerciseID)
+func (q *Queries) GetStatus(ctx context.Context, exerciseID string) ([]GetStatusRow, error) {
+	rows, err := q.db.Query(ctx, getStatus, exerciseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetSolversRow
+	var items []GetStatusRow
 	for rows.Next() {
-		var i GetSolversRow
-		if err := rows.Scan(&i.ID, &i.Username, &i.Solved); err != nil {
+		var i GetStatusRow
+		if err := rows.Scan(&i.UserID, &i.Solved); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -256,29 +255,4 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
-}
-
-const userSolvedExercise = `-- name: UserSolvedExercise :exec
-INSERT INTO solved (
-    user_id, username, exercise_id, title
-) VALUES (
-    $1, $2, $3, $4
-) ON CONFLICT DO NOTHING
-`
-
-type UserSolvedExerciseParams struct {
-	UserID     int64
-	Username   string
-	ExerciseID string
-	Title      string
-}
-
-func (q *Queries) UserSolvedExercise(ctx context.Context, arg UserSolvedExerciseParams) error {
-	_, err := q.db.Exec(ctx, userSolvedExercise,
-		arg.UserID,
-		arg.Username,
-		arg.ExerciseID,
-		arg.Title,
-	)
-	return err
 }

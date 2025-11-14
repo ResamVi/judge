@@ -9,20 +9,13 @@ type Exercise struct {
 	Title string
 }
 
-type Solved struct {
-	UserID     int64
-	Username   string
-	ExerciseID string
-	Title      string
-}
-
 type Submission struct {
 	UserID     int64
 	ExerciseID string
 	Code       string
 	Output     string
 	Evaluation string
-	Solved     bool
+	Solved     int32
 }
 
 type User struct {

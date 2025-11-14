@@ -73,7 +73,6 @@ func (k Handler) LoginView(c echo.Context) error {
 		<input type="password" placeholder="Passwort" name="password" required>
 
 		<button type="submit" >Login</button>
-		<!-- <label><input type="checkbox" checked="checked" name="remember"> Eingeloggt bleiben</label> TODO: -->
 	</div>
 
 	<div class="container" style="background-color:#f1f1f1">

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/ResamVi/judge/db"
 	"github.com/labstack/echo/v4"
 	"log/slog"
 	"net/http"
@@ -61,14 +62,14 @@ func (k Handler) status(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("getting users: %w", err)
 	}
 
+	usersHTML := ""
+	for _, user := range users {
+		usersHTML += fmt.Sprintf("<th style=\"text-align:center\">%s</th>", user.Username)
+	}
+
 	exercises, err := k.db.GetExercises(ctx)
 	if err != nil {
 		return "", fmt.Errorf("getting exercises: %w", err)
-	}
-
-	usersHTML := ""
-	for _, user := range users {
-		usersHTML += fmt.Sprintf("<th>%s</th>", user.Username)
 	}
 
 	// TODO: This would be prettier using template language (low)
@@ -77,16 +78,19 @@ func (k Handler) status(ctx context.Context) (string, error) {
 		exercisesHTML += "<tr>"
 		exercisesHTML += "<td>" + exercise.Title + "</th>"
 
-		solvers, err := k.db.GetSolvers(ctx, exercise.ID)
+		status, err := k.db.GetStatus(ctx, exercise.ID)
 		if err != nil {
 			return "", fmt.Errorf("getting solvers: %w", err)
 		}
 
-		for _, solver := range solvers {
-			if solver.Solved {
-				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">✔️</a></td>`, exercise.ID, solver.ID)
-			} else {
-				exercisesHTML += fmt.Sprintf("<td> </td>")
+		for _, row := range status {
+			switch row.Solved {
+			case db.NotAttempted:
+				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d"> </a></td>`, exercise.ID, row.UserID)
+			case db.Attempted:
+				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">❌</a></td>`, exercise.ID, row.UserID)
+			case db.Solved:
+				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">✔️</a></td>`, exercise.ID, row.UserID)
 			}
 		}
 		exercisesHTML += "</tr>"

@@ -19,15 +19,15 @@ ORDER BY id ASC;
 SELECT * FROM exercises
 ORDER BY id ASC;
 
--- name: GetSolvers :many
+-- name: GetStatus :many
 SELECT
-    u.id,
-    u.username,
-    (usex.user_id IS NOT NULL)::boolean AS solved
+    u.id AS user_id,
+    COALESCE(s.solved, 0) AS solved
 FROM users u
-LEFT JOIN solved usex ON usex.user_id = u.id
-AND usex.exercise_id = $1
-ORDER BY u.id;
+    LEFT JOIN submissions s
+    ON s.user_id = u.id
+    AND s.exercise_id = $1
+ORDER BY u.id ASC;
 
 -- name: GetSubmission :one
 SELECT * FROM submissions
@@ -60,10 +60,3 @@ SET
     output = EXCLUDED.output,
     evaluation = EXCLUDED.evaluation,
     solved = EXCLUDED.solved;
-
--- name: UserSolvedExercise :exec
-INSERT INTO solved (
-    user_id, username, exercise_id, title
-) VALUES (
-    $1, $2, $3, $4
-) ON CONFLICT DO NOTHING;
