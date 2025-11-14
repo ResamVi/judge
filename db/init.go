@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 	"os"
@@ -61,5 +62,65 @@ func Init(url string, adminPassword string) (*Queries, error) {
 		}
 	}
 
+	// Testdaten
+	err = testData(ctx, queries)
+	if err != nil {
+		return nil, fmt.Errorf("could not initialize testData: %w", err)
+	}
+
 	return queries, nil
+}
+
+func testData(ctx context.Context, queries *Queries) error {
+	err := queries.CreateUser(ctx, CreateUserParams{
+		Username: "lou",
+		Password: "$2a$10$aIX0H/Wpntz7VAHJ3rWs1OKlMPVStaG1FZn25hdsvdnLmNq2/SITy",
+		Token:    "3aef3950-a3b0-46ae-8fda-5d97d26740c4",
+		Approved: true,
+	})
+	if err != nil {
+		return fmt.Errorf("failed creating lou: %w", err)
+	}
+
+	err = queries.CreateUser(ctx, CreateUserParams{
+		Username: "anna",
+		Password: "$2a$10$aIX0H/Wpntz7VAHJ3rWs1OKlMPVStaG1FZn25hdsvdnLmNq2/SITy",
+		Token:    "0d93769c-6aa8-4316-b9c4-dd14a61311de",
+		Approved: true,
+	})
+	if err != nil {
+		return fmt.Errorf("failed creating anna: %w", err)
+	}
+	err = queries.UserSolvedExercise(ctx, UserSolvedExerciseParams{
+		UserID: 2,
+		Username: pgtype.Text{
+			String: "lou",
+			Valid:  true,
+		},
+		ExerciseID: "01-compiler",
+		Title: pgtype.Text{
+			String: "Der Compiler",
+			Valid:  true,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed creating lou solving: %w", err)
+	}
+	err = queries.UserSolvedExercise(ctx, UserSolvedExerciseParams{
+		UserID: 3,
+		Username: pgtype.Text{
+			String: "anna",
+			Valid:  true,
+		},
+		ExerciseID: "02-hello-world",
+		Title: pgtype.Text{
+			String: "Das erste Programm",
+			Valid:  true,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed creating anna solving: %w", err)
+	}
+
+	return nil
 }

@@ -25,7 +25,7 @@ SELECT
     u.username,
     (usex.user_id IS NOT NULL)::boolean AS solved
 FROM users u
-LEFT JOIN user_solved_exercise usex ON usex.user_id = u.id
+LEFT JOIN solved usex ON usex.user_id = u.id
 AND usex.exercise_id = $1
 ORDER BY u.id;
 
@@ -58,8 +58,8 @@ INSERT INTO submissions (
 SET code = EXCLUDED.code, output = EXCLUDED.output;
 
 -- name: UserSolvedExercise :exec
-INSERT INTO user_solved_exercise (
+INSERT INTO solved (
     user_id, username, exercise_id, title
 ) VALUES (
     $1, $2, $3, $4
-);
+) ON CONFLICT DO NOTHING;

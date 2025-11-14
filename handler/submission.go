@@ -33,7 +33,10 @@ func (k Handler) Submission(c echo.Context) error {
 	}
 
 	data := k.page
-	data.Body = "<h2>Code</h2><pre><code>" + subm.Code.String + "</code></pre><h2>Output</h2><pre><code>" + subm.Output.String + "</code></pre>"
+	data.Body += "<h2>Output</h2>"
+	data.Body += "<pre><code>" + subm.Output.String + "</code></pre>"
+	data.Body += "<h2>Code</h2>"
+	data.Body += "<pre><code>" + subm.Code.String + "</code></pre>"
 
 	return c.Render(http.StatusOK, "index", data)
 }

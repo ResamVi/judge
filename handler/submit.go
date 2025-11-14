@@ -114,6 +114,28 @@ func (k Handler) Submit(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
+type Criteria struct {
+	Description string
+	Valid       func(code string) error
+}
+
+type Exercise struct {
+	Criteria []Criteria
+}
+
+var exercises = map[string]Exercise{
+	"01-compiler": {
+		Criteria: []Criteria{
+			{
+				Description: "Beispielkriterium",
+				Valid: func(code string) error {
+					return fmt.Errorf("Ist noch nicht am funktionieren")
+				},
+			},
+		},
+	},
+}
+
 func evaluate(code string, s string) {
 
 }

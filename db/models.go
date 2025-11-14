@@ -13,6 +13,13 @@ type Exercise struct {
 	Title string
 }
 
+type Solved struct {
+	UserID     int64
+	Username   pgtype.Text
+	ExerciseID string
+	Title      pgtype.Text
+}
+
 type Submission struct {
 	UserID     int64
 	ExerciseID string
@@ -26,11 +33,4 @@ type User struct {
 	Password string
 	Token    string
 	Approved bool
-}
-
-type UserSolvedExercise struct {
-	UserID     int64
-	Username   pgtype.Text
-	ExerciseID string
-	Title      pgtype.Text
 }
