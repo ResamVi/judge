@@ -13,6 +13,6 @@ Mit dem *Judge* lassen sich Aufgaben herunterladen, bearbeiten und wieder zur Be
 4. Für die Kommunikation mit dem Judge installieren wir lokal den Judge mit folgendem Befehl:
 
 ```bash
-go install github.com/ResamVi/judge/cmd/cli@latest
+go install github.com/ResamVi/judge/cmd/judge@latest
 ```
 5. Führe den Judge aus und kopiere deinen [Token](/token) in das Eingabefeld

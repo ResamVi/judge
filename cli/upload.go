@@ -27,7 +27,7 @@ func updateUpload(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
-	m.List, cmd = m.List.Update(msg)
+	m.ListFolders, cmd = m.ListFolders.Update(msg)
 	cmds = append(cmds, cmd)
 
 	m.Spinner, cmd = m.Spinner.Update(msg)
@@ -35,7 +35,7 @@ func updateUpload(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.List.SetWidth(msg.Width)
+		m.ListFolders.SetWidth(msg.Width)
 		return m, nil
 
 	case tea.KeyMsg:
@@ -45,7 +45,7 @@ func updateUpload(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 				return m, tea.Batch(cmds...)
 			}
 
-			i, ok := m.List.SelectedItem().(item)
+			i, ok := m.ListFolders.SelectedItem().(item)
 			if !ok {
 				panic("not found")
 			}
@@ -61,6 +61,7 @@ func updateUpload(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 		m.Validating = false
 		if msg.Error == "" {
 			m.Page++
+			m.FarewellMessage = "Übung erfolgreich hochgeladen"
 			m.Quitting = true
 			return m, nil
 		}
@@ -72,7 +73,7 @@ func updateUpload(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 }
 
 func viewUpload(m Model) string {
-	tpl := m.List.View() + "\n"
+	tpl := m.ListFolders.View() + "\n"
 
 	if m.Validating {
 		tpl += fmt.Sprintf(" %s Lade hoch...\n\n", m.Spinner.View())

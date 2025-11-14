@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/ResamVi/judge/db"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"io"
 	"log/slog"
@@ -89,55 +88,68 @@ func (k Handler) Submit(c echo.Context) error {
 		output = buildStderr
 	}
 
+	evaluation, solved := gradeSubmission(exercise, code, output.String())
+
 	err = k.db.CreateSubmission(c.Request().Context(), db.CreateSubmissionParams{
 		UserID:     user.ID,
 		ExerciseID: exercise,
-		Code: pgtype.Text{
-			String: code,
-			Valid:  true,
-		},
-		Output: pgtype.Text{
-			String: output.String(),
-			Valid:  true,
-		},
-		// TODO: Increase attempt count
+		Code:       code,
+		Output:     output.String(),
+		Evaluation: evaluation,
+		Solved:     solved,
 	})
 	if err != nil {
 		slog.Error("failed to create submission", "userId", user.ID, "exercise", exercise, "error", err.Error())
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	evaluate(code, output.String())
-
 	// TODO: Only keep 20 most recent submissions
 
 	return c.NoContent(http.StatusOK)
 }
 
+// TODO: move to grading package
 type Criteria struct {
 	Description string
-	Valid       func(code string) error
+	Valid       func(code, output string) (comment string, failed bool)
 }
 
 type Exercise struct {
 	Criteria []Criteria
 }
 
-var exercises = map[string]Exercise{
+var Grading = map[string]Exercise{
 	"01-compiler": {
 		Criteria: []Criteria{
 			{
 				Description: "Beispielkriterium",
-				Valid: func(code string) error {
-					return fmt.Errorf("Ist noch nicht am funktionieren")
+				Valid: func(code, output string) (string, bool) {
+					return "❌, Ist noch nicht am funktionieren", false
+					// return "✅ Ist am funktionieren", true
 				},
 			},
 		},
 	},
 }
 
-func evaluate(code string, s string) {
+func gradeSubmission(exercise string, code string, output string) (string, bool) {
+	criteria, ok := Grading[exercise]
+	if !ok {
+		return "Unbekannt: " + exercise, false
+	}
 
+	evaluation := ""
+	solved := true
+
+	for _, fn := range criteria.Criteria {
+		comment, valid := fn.Valid(code, output)
+		if !valid {
+			solved = false
+		}
+		evaluation += comment + "<br>"
+	}
+
+	return evaluation, solved
 }
 
 // unzipBytes extracts a zip-from-memory into destDir.

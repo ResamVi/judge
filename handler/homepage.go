@@ -71,12 +71,11 @@ func (k Handler) status(ctx context.Context) (string, error) {
 		usersHTML += fmt.Sprintf("<th>%s</th>", user.Username)
 	}
 
-	// TODO: Clickable links
+	// TODO: This would be prettier using template language (low)
 	exercisesHTML := ""
 	for _, exercise := range exercises {
 		exercisesHTML += "<tr>"
-		id, _, _ := strings.Cut(exercise.ID, "-")
-		exercisesHTML += fmt.Sprintf("<th>Aufgabe %s: %s</td>", id, exercise.Title)
+		exercisesHTML += "<td>" + exercise.Title + "</th>"
 
 		solvers, err := k.db.GetSolvers(ctx, exercise.ID)
 		if err != nil {
@@ -88,16 +87,15 @@ func (k Handler) status(ctx context.Context) (string, error) {
 				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">✔️</a></td>`, exercise.ID, solver.ID)
 			} else {
 				exercisesHTML += fmt.Sprintf("<td> </td>")
-				// exercisesHTML += fmt.Sprintf("<td>❌</td>")
 			}
 		}
 		exercisesHTML += "</tr>"
 	}
 
 	return fmt.Sprintf(`
-	<h1>Status</h1>
+	<h1>Bisheriger Stand</h1>
 
-	<table>
+	<table style="width:100%%">
 	<tr>
 		<td></td>
 		%s

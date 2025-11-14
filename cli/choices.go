@@ -16,8 +16,8 @@ func viewChoices(m Model) string {
 
 	choices := fmt.Sprintf(
 		"%s\n%s\n%s",
-		checkbox("Neue Aufgabe herunterladen", c == 0),
-		checkbox("Bearbeitete Aufgabe hochladen", c == 1),
+		checkbox("Bearbeitete Aufgabe hochladen", c == 0),
+		checkbox("Neue Aufgabe herunterladen", c == 1),
 		checkbox("Zugang konfigurieren", c == 2),
 	)
 
@@ -40,7 +40,7 @@ func updateChoices(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			}
 		case "enter":
 			m.Page++
-			return m, frame()
+			return m, nil
 		}
 	}
 

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"bytes"
+	"context"
 	"fmt"
 	"github.com/ResamVi/judge/db"
 	"github.com/labstack/echo/v4"
@@ -9,8 +9,6 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"log/slog"
 	"net/http"
-	"os"
-	"strings"
 )
 
 var (
@@ -39,7 +37,7 @@ type Handler struct {
 }
 
 func New(queries *db.Queries, env string) (*Handler, error) {
-	exercises, err := getExercises()
+	exercises, err := getExercises(queries)
 	if err != nil {
 		return nil, fmt.Errorf("getting exercises: %w", err)
 	}
@@ -121,31 +119,19 @@ func (k Handler) RegisterView(c echo.Context) error {
 	return c.Render(http.StatusOK, "index", data)
 }
 
-func getExercises() ([]MenuItem, error) {
-	entries, err := os.ReadDir("tasks")
+func getExercises(queries *db.Queries) ([]MenuItem, error) {
+	exercises, err := queries.GetExercises(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("read dir of tasks: %w", err)
+		return nil, fmt.Errorf("GetExercises: %w", err)
 	}
 
-	var exercises []MenuItem
-	for _, e := range entries {
-		file, err := os.ReadFile("tasks/" + e.Name() + "/README.md")
-		if err != nil {
-			return nil, fmt.Errorf("read README.md of folder: %w", err)
-		}
-		title, _, found := bytes.Cut(file, []byte("\n"))
-		if !found {
-			return nil, fmt.Errorf("missing title in README.md of " + e.Name())
-		}
-		title = bytes.TrimPrefix(title, []byte("# "))
-
-		name, _, _ := strings.Cut(e.Name(), "-")
-
-		exercises = append(exercises, MenuItem{
-			Name: fmt.Sprintf("Aufgabe %s: %s", name, string(title)),
-			Link: "/tasks/" + e.Name(),
+	var items []MenuItem
+	for _, ex := range exercises {
+		items = append(items, MenuItem{
+			Name: ex.Title,
+			Link: "/tasks/" + ex.ID,
 		})
 	}
 
-	return exercises, nil
+	return items, nil
 }

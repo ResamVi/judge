@@ -41,7 +41,7 @@ func main() {
 		panic(err)
 	}
 
-	queries, err := db.Init(url, password)
+	queries, err := db.Init(url, password, environment)
 	if err != nil {
 		panic(err)
 	}
@@ -63,10 +63,12 @@ func main() {
 		panic(err)
 	}
 
+	// TODO: should be consistently "exercises" not "tasks" (low)
 	e.GET("/", h.Homepage)
 	e.GET("/login", h.LoginView)
 	e.GET("/register", h.RegisterView)
 	e.GET("/token", h.Token)
+	e.GET("/tasks", h.TaskList)
 	e.GET("/tasks/:task", h.TaskHandler)
 	e.GET("/tasks/:task/code", CodeHandler)
 	e.GET("/submission/:task/:user", h.Submission)

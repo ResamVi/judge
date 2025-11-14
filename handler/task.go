@@ -85,3 +85,16 @@ func codeView(name string) string {
 	return code
 }
 
+func (k Handler) TaskList(c echo.Context) error {
+	exercises, err := k.db.GetExercises(c.Request().Context())
+	if err != nil {
+		slog.Error("db.GetExercises: " + err.Error())
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	result := make(map[string]string)
+	for _, exercise := range exercises {
+		result[exercise.Title] = exercise.ID
+	}
+
+	return c.JSON(http.StatusOK, result)
+}

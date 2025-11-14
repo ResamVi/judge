@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createExercise = `-- name: CreateExercise :exec
@@ -31,18 +29,24 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 
 const createSubmission = `-- name: CreateSubmission :exec
 INSERT INTO submissions (
-    user_id, exercise_id, code, output
+    user_id, exercise_id, code, output, evaluation, solved
 ) VALUES (
-     $1, $2, $3, $4
+     $1, $2, $3, $4, $5, $6
 ) ON CONFLICT (user_id, exercise_id) DO UPDATE
-SET code = EXCLUDED.code, output = EXCLUDED.output
+SET
+    code = EXCLUDED.code,
+    output = EXCLUDED.output,
+    evaluation = EXCLUDED.evaluation,
+    solved = EXCLUDED.solved
 `
 
 type CreateSubmissionParams struct {
 	UserID     int64
 	ExerciseID string
-	Code       pgtype.Text
-	Output     pgtype.Text
+	Code       string
+	Output     string
+	Evaluation string
+	Solved     bool
 }
 
 func (q *Queries) CreateSubmission(ctx context.Context, arg CreateSubmissionParams) error {
@@ -51,6 +55,8 @@ func (q *Queries) CreateSubmission(ctx context.Context, arg CreateSubmissionPara
 		arg.ExerciseID,
 		arg.Code,
 		arg.Output,
+		arg.Evaluation,
+		arg.Solved,
 	)
 	return err
 }
@@ -143,7 +149,7 @@ func (q *Queries) GetSolvers(ctx context.Context, exerciseID string) ([]GetSolve
 }
 
 const getSubmission = `-- name: GetSubmission :one
-SELECT code, output FROM submissions
+SELECT user_id, exercise_id, code, output, evaluation, solved FROM submissions
 WHERE user_id = $1 AND exercise_id = $2
 `
 
@@ -152,15 +158,17 @@ type GetSubmissionParams struct {
 	ExerciseID string
 }
 
-type GetSubmissionRow struct {
-	Code   pgtype.Text
-	Output pgtype.Text
-}
-
-func (q *Queries) GetSubmission(ctx context.Context, arg GetSubmissionParams) (GetSubmissionRow, error) {
+func (q *Queries) GetSubmission(ctx context.Context, arg GetSubmissionParams) (Submission, error) {
 	row := q.db.QueryRow(ctx, getSubmission, arg.UserID, arg.ExerciseID)
-	var i GetSubmissionRow
-	err := row.Scan(&i.Code, &i.Output)
+	var i Submission
+	err := row.Scan(
+		&i.UserID,
+		&i.ExerciseID,
+		&i.Code,
+		&i.Output,
+		&i.Evaluation,
+		&i.Solved,
+	)
 	return i, err
 }
 
@@ -260,9 +268,9 @@ INSERT INTO solved (
 
 type UserSolvedExerciseParams struct {
 	UserID     int64
-	Username   pgtype.Text
+	Username   string
 	ExerciseID string
-	Title      pgtype.Text
+	Title      string
 }
 
 func (q *Queries) UserSolvedExercise(ctx context.Context, arg UserSolvedExerciseParams) error {

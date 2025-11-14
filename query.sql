@@ -30,7 +30,7 @@ AND usex.exercise_id = $1
 ORDER BY u.id;
 
 -- name: GetSubmission :one
-SELECT code, output FROM submissions
+SELECT * FROM submissions
 WHERE user_id = $1 AND exercise_id = $2;
 
 
@@ -51,11 +51,15 @@ INSERT INTO exercises (
 
 -- name: CreateSubmission :exec
 INSERT INTO submissions (
-    user_id, exercise_id, code, output
+    user_id, exercise_id, code, output, evaluation, solved
 ) VALUES (
-     $1, $2, $3, $4
+     $1, $2, $3, $4, $5, $6
 ) ON CONFLICT (user_id, exercise_id) DO UPDATE
-SET code = EXCLUDED.code, output = EXCLUDED.output;
+SET
+    code = EXCLUDED.code,
+    output = EXCLUDED.output,
+    evaluation = EXCLUDED.evaluation,
+    solved = EXCLUDED.solved;
 
 -- name: UserSolvedExercise :exec
 INSERT INTO solved (

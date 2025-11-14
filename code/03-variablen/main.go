@@ -3,7 +3,6 @@ package main
 import "fmt"
 
 func main() {
-	// Teil 1
 	var name string = "Max Mustermann"
 	var age int = 32
 	var height float32 = 1.75
@@ -12,7 +11,6 @@ func main() {
 	fmt.Println(age)
 	fmt.Println(height)
 
-	// Teil 2
 	fmt.Println("Wie ist dein Name?")
 	fmt.Scanln(&name)
 

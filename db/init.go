@@ -5,13 +5,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 	"os"
+	"strings"
 )
 
-func Init(url string, adminPassword string) (*Queries, error) {
+func Init(url string, adminPassword string, environment string) (*Queries, error) {
 	ctx := context.Background()
 	conn, err := pgxpool.New(ctx, "postgres://"+url)
 	if err != nil {
@@ -26,10 +26,15 @@ func Init(url string, adminPassword string) (*Queries, error) {
 		return nil, fmt.Errorf("generating admin password: %w", err)
 	}
 
+	token := uuid.New().String()
+	if environment == "development" {
+		token = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+	}
+
 	err = queries.CreateUser(ctx, CreateUserParams{
 		Username: "julienministrator",
 		Password: string(encrypted),
-		Token:    uuid.New().String(),
+		Token:    token,
 		Approved: true,
 	})
 	if err != nil {
@@ -53,14 +58,23 @@ func Init(url string, adminPassword string) (*Queries, error) {
 		}
 		title = bytes.TrimPrefix(title, []byte("# "))
 
+		number, _, found := strings.Cut(e.Name(), "-")
+		if !found {
+			return nil, fmt.Errorf("missing '-' in title of " + e.Name())
+		}
+
 		err = queries.CreateExercise(ctx, CreateExerciseParams{
 			ID:    e.Name(),
-			Title: string(title),
+			Title: fmt.Sprintf("Aufgabe %s: %s", number, string(title)),
 		})
 		if err != nil {
 			return nil, fmt.Errorf("create exercise for %s: %w", e.Name(), err)
 		}
 	}
+
+	//if len(entries) != len(handler.Grading) {
+	//	return nil, fmt.Errorf("exercises in fs: %d exercises in code: %d", len(entries), len(handler.Exercises))
+	//}
 
 	// Testdaten
 	err = testData(ctx, queries)
@@ -91,36 +105,24 @@ func testData(ctx context.Context, queries *Queries) error {
 	if err != nil {
 		return fmt.Errorf("failed creating anna: %w", err)
 	}
-	err = queries.UserSolvedExercise(ctx, UserSolvedExerciseParams{
-		UserID: 2,
-		Username: pgtype.Text{
-			String: "lou",
-			Valid:  true,
-		},
-		ExerciseID: "01-compiler",
-		Title: pgtype.Text{
-			String: "Der Compiler",
-			Valid:  true,
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("failed creating lou solving: %w", err)
-	}
-	err = queries.UserSolvedExercise(ctx, UserSolvedExerciseParams{
-		UserID: 3,
-		Username: pgtype.Text{
-			String: "anna",
-			Valid:  true,
-		},
-		ExerciseID: "02-hello-world",
-		Title: pgtype.Text{
-			String: "Das erste Programm",
-			Valid:  true,
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("failed creating anna solving: %w", err)
-	}
+	//err = queries.UserSolvedExercise(ctx, UserSolvedExerciseParams{
+	//	UserID:     2,
+	//	Username:   "lou",
+	//	ExerciseID: "01-compiler",
+	//	Title:      "Der Compiler",
+	//})
+	//if err != nil {
+	//	return fmt.Errorf("failed creating lou solving: %w", err)
+	//}
+	//err = queries.UserSolvedExercise(ctx, UserSolvedExerciseParams{
+	//	UserID:     3,
+	//	Username:   "anna",
+	//	ExerciseID: "02-hello-world",
+	//	Title:      "Das erste Programm",
+	//})
+	//if err != nil {
+	//	return fmt.Errorf("failed creating anna solving: %w", err)
+	//}
 
 	return nil
 }

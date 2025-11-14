@@ -27,16 +27,18 @@ func (k Handler) Submission(c echo.Context) error {
 		UserID:     user.ID,
 		ExerciseID: task,
 	})
-	if err != nil || !subm.Code.Valid {
+	if err != nil {
 		slog.Error("could not find submission for user", "task", task, "user", user.Username)
 		return c.HTML(http.StatusOK, `<div><meta http-equiv="refresh" content="03; url=/">Benutzer hat Aufgabe noch nicht gelöst</div>`)
 	}
 
 	data := k.page
 	data.Body += "<h2>Output</h2>"
-	data.Body += "<pre><code>" + subm.Output.String + "</code></pre>"
+	data.Body += "<pre><code>" + subm.Output + "</code></pre>"
+	data.Body += "<h2>Evaluation</h2>"
+	data.Body += subm.Evaluation
 	data.Body += "<h2>Code</h2>"
-	data.Body += "<pre><code>" + subm.Code.String + "</code></pre>"
+	data.Body += "<pre><code>" + subm.Code + "</code></pre>"
 
 	return c.Render(http.StatusOK, "index", data)
 }

@@ -7,45 +7,25 @@ CREATE TABLE users (
 );
 
 CREATE TABLE exercises (
-   id        char(24)    PRIMARY KEY,
+   id        text        PRIMARY KEY,
    title     text        NOT NULL UNIQUE
 );
 
 -- INFO: Break second normal form for better reading experience when querying in psql
 CREATE TABLE solved (
-    user_id     BIGSERIAL   REFERENCES users(id),
-    username    text        REFERENCES users(username),
-    exercise_id char(24)    REFERENCES exercises(id),
-    title       text        REFERENCES exercises(title),
+    user_id     BIGSERIAL   NOT NULL    REFERENCES users(id),
+    username    text        NOT NULL    REFERENCES users(username),
+    exercise_id text        NOT NULL    REFERENCES exercises(id),
+    title       text        NOT NULL    REFERENCES exercises(title),
     PRIMARY KEY (user_id, exercise_id)
 );
 
 CREATE TABLE submissions (
     user_id     BIGSERIAL   REFERENCES users(id),
-    exercise_id char(24)    REFERENCES exercises(id),
-    code        text,
-    output      text,
+    exercise_id text        REFERENCES exercises(id),
+    code        text        NOT NULL,
+    output      text        NOT NULL,
+    evaluation  text        NOT NULL,
+    solved      boolean     NOT NULL,
     PRIMARY KEY (user_id, exercise_id)
 );
-
------- Test data ------
-
--- INSERT INTO users (username, token, password, approved) VALUES ('admin', 'abc0', '$2a$10$aIX0H/Wpntz7VAHJ3rWs1OKlMPVStaG1FZn25hdsvdnLmNq2/SITy', true);
--- INSERT INTO users (username, token, password, approved) VALUES ('l0rdpwned', 'abc1', '$2a$10$aIX0H/Wpntz7VAHJ3rWs1OKlMPVStaG1FZn25hdsvdnLmNq2/SITy', true);
---
--- -- TODO: beim initialisieren sollten die Einträge erstellt werden
--- INSERT INTO exercises(id, title) VALUES ('01-compiler', 'Der Compiler');
--- INSERT INTO exercises(id, title) VALUES ('02-hello-world', 'Das erste Programm');
--- INSERT INTO exercises(id, title) VALUES ('03-values', 'Werte ausgeben');
--- INSERT INTO exercises(id, title) VALUES ('05-booleans', 'Lasagne kochen');
--- INSERT INTO exercises(id, title) VALUES ('05-funktionen', 'Rettungsaktion');
--- INSERT INTO exercises(id, title) VALUES ('05-mathe', 'Autofabrik');
--- INSERT INTO exercises(id, title) VALUES ('06-strings', 'Willkommensnachricht');
--- INSERT INTO exercises(id, title) VALUES ('07-if', 'Autokauf');
--- INSERT INTO exercises(id, title) VALUES ('08-switch', 'Blackjack');
--- INSERT INTO exercises(id, title) VALUES ('09-structs', 'Rennfahren');
--- INSERT INTO exercises(id, title) VALUES ('10-slices', 'Kartentricks');
---
--- INSERT INTO user_solved_exercise (user_id, username, exercise_id, title) VALUES (1, 'admin', '01-compiler', 'Der Compiler');
--- INSERT INTO user_solved_exercise (user_id, username, exercise_id, title) VALUES (2, 'l0rdpwned', '01-compiler', 'Der Compiler');
--- INSERT INTO user_solved_exercise (user_id, username, exercise_id, title) VALUES (2, 'l0rdpwned', '02-hello-world', 'Das erste Programm');
