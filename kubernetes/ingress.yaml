@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: judge-ingress
+  namespace: default
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: judge.resamvi.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: judge-server
+            port:
+              number: 8080
+  tls:
+    - secretName: judge-cert-secret
+      hosts:
+        - judge.resamvi.io
