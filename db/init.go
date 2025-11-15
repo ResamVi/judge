@@ -4,18 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/ResamVi/judge/grading"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 	"os"
 	"strings"
-)
-
-// TODO: should be part of grading (mid)
-const (
-	NotAttempted = 0
-	Attempted    = 1
-	Solved       = 2
 )
 
 func Init(url string, adminPassword string, environment string) (*Queries, error) {
@@ -117,7 +111,7 @@ func initializeTestdata(ctx context.Context, queries *Queries) error {
 		Code:       "package main",
 		Output:     "Hello World!",
 		Evaluation: "❌, Ist noch nicht am funktionieren",
-		Solved:     Attempted,
+		Solved:     int32(grading.Attempted),
 	})
 	if err != nil {
 		return fmt.Errorf("failed creating lou solving: %w", err)
@@ -128,7 +122,7 @@ func initializeTestdata(ctx context.Context, queries *Queries) error {
 		Code:       "package main\n\nfunc main() {\n\tfmt.Println(\"Hello World!\")\n}",
 		Output:     "Hello World!",
 		Evaluation: "✅ Ist am funktionieren",
-		Solved:     Solved,
+		Solved:     int32(grading.Solved),
 	})
 	if err != nil {
 		return fmt.Errorf("failed creating anna solving: %w", err)

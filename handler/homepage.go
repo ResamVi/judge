@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ResamVi/judge/db"
+	"github.com/ResamVi/judge/grading"
 	"github.com/labstack/echo/v4"
 	"log/slog"
 	"net/http"
@@ -84,12 +84,12 @@ func (k Handler) status(ctx context.Context) (string, error) {
 		}
 
 		for _, row := range status {
-			switch row.Solved {
-			case db.NotAttempted:
+			switch grading.Grade(row.Solved) {
+			case grading.NotAttempted:
 				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d"> </a></td>`, exercise.ID, row.UserID)
-			case db.Attempted:
+			case grading.Attempted:
 				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">❌</a></td>`, exercise.ID, row.UserID)
-			case db.Solved:
+			case grading.Solved:
 				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">✔️</a></td>`, exercise.ID, row.UserID)
 			}
 		}

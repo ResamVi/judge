@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/ResamVi/judge/db"
+	"github.com/ResamVi/judge/grading"
 	"github.com/labstack/echo/v4"
 	"io"
 	"log/slog"
@@ -44,8 +45,6 @@ func (k Handler) Submit(c echo.Context) error {
 	// == Store the code in database ==
 	code := ""
 	for _, f := range zr.File {
-		code += fmt.Sprintf("\n// === File: %s ===\n", f.Name)
-
 		rc, err := f.Open()
 		if err != nil {
 			slog.Error(err.Error())
@@ -63,7 +62,7 @@ func (k Handler) Submit(c echo.Context) error {
 	}
 
 	// == Store code locally for execution ==
-	destDir := filepath.Join("submissions", time.Now().Format("2006-01-02T15-04"))
+	destDir := filepath.Join("submissions", time.Now().Format("2006-01-02T15-04")+"_"+user.Username)
 
 	if err := os.MkdirAll(destDir, os.ModePerm); err != nil {
 		slog.Error("cannot create dest dir", "error", err.Error())
@@ -83,12 +82,16 @@ func (k Handler) Submit(c echo.Context) error {
 	runCmd.Stderr = &buildStderr
 	runCmd.Stdout = &output
 
+	var evaluation string
+	var solved grading.Grade
 	if err := runCmd.Run(); err != nil {
-		fmt.Printf("Build failed:\n%s\n", buildStderr.String())
+		slog.Warn("Build failed", "user", user.Username, "error", buildStderr.String())
 		output = buildStderr
+		evaluation = "❌ Programm konnte nicht kompiliert werden"
+		solved = grading.Attempted
+	} else {
+		evaluation, solved = grading.GradeSubmission(exercise, code, output.String())
 	}
-
-	evaluation, solved := gradeSubmission(exercise, code, output.String())
 
 	err = k.db.CreateSubmission(c.Request().Context(), db.CreateSubmissionParams{
 		UserID:     user.ID,
@@ -106,50 +109,6 @@ func (k Handler) Submit(c echo.Context) error {
 	// TODO: Only keep 20 most recent submissions
 
 	return c.NoContent(http.StatusOK)
-}
-
-// TODO: move to grading package
-type Criteria struct {
-	Description string
-	Valid       func(code, output string) (comment string, failed bool)
-}
-
-type Exercise struct {
-	Criteria []Criteria
-}
-
-var Grading = map[string]Exercise{
-	"01-compiler": {
-		Criteria: []Criteria{
-			{
-				Description: "Beispielkriterium",
-				Valid: func(code, output string) (string, bool) {
-					return "❌, Ist noch nicht am funktionieren", false
-					// return "✅ Ist am funktionieren", true
-				},
-			},
-		},
-	},
-}
-
-func gradeSubmission(exercise string, code string, output string) (string, int) {
-	criteria, ok := Grading[exercise]
-	if !ok {
-		return "Unbekannt: " + exercise, db.NotAttempted
-	}
-
-	evaluation := ""
-	solved := db.Solved
-
-	for _, fn := range criteria.Criteria {
-		comment, valid := fn.Valid(code, output)
-		if !valid {
-			solved = db.Attempted
-		}
-		evaluation += comment + "<br>"
-	}
-
-	return evaluation, solved
 }
 
 // unzipBytes extracts a zip-from-memory into destDir.
