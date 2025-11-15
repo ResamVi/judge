@@ -54,7 +54,7 @@ func updateUpload(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 
 			cmds = append(cmds,
 				m.Spinner.Tick,
-				uploadCmd(m.JudgeURL, m.Token, string(i)),
+				uploadCmd(m.Token, string(i)),
 			)
 		}
 	case uploadResult:
@@ -88,13 +88,13 @@ func viewUpload(m Model) string {
 	return tpl
 }
 
-func uploadCmd(url, token, value string) tea.Cmd {
+func uploadCmd(token, value string) tea.Cmd {
 	return func() tea.Msg {
-		return uploadResult{Error: uploadFolder(url, token, value)}
+		return uploadResult{Error: uploadFolder(token, value)}
 	}
 }
 
-func uploadFolder(url, token, directoryName string) string {
+func uploadFolder(token, directoryName string) string {
 	time.Sleep(1 * time.Second)
 
 	path, err := os.Getwd()
@@ -117,7 +117,7 @@ func uploadFolder(url, token, directoryName string) string {
 	b64 := base64.StdEncoding.EncodeToString(zipBytes)
 
 	// 4. POST it
-	req, err := http.NewRequest(http.MethodPost, url+"/submission", bytes.NewReader([]byte(b64)))
+	req, err := http.NewRequest(http.MethodPost, JudgeURL+"/submission", bytes.NewReader([]byte(b64)))
 	if err != nil {
 		return "NewRequest: " + err.Error()
 	}

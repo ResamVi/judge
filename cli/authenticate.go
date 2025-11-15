@@ -61,7 +61,7 @@ func updateAuthenticate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 
 			cmds = append(cmds,
 				m.Spinner.Tick,
-				validateCmd(m.JudgeURL, m.TokenInput.Value()),
+				validateCmd(m.TokenInput.Value()),
 			)
 		}
 	case validationResult:
@@ -77,16 +77,16 @@ func updateAuthenticate(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 
 	return m, tea.Batch(cmds...)
 }
-func validateCmd(url, value string) tea.Cmd {
+func validateCmd(value string) tea.Cmd {
 	return func() tea.Msg {
-		return validationResult{Error: validateToken(url, value)}
+		return validationResult{Error: validateToken(value)}
 	}
 }
 
-func validateToken(url, token string) string {
+func validateToken(token string) string {
 	time.Sleep(1 * time.Second)
 
-	req, err := http.NewRequest(http.MethodPost, url+"/validate/token", nil)
+	req, err := http.NewRequest(http.MethodPost, JudgeURL+"/validate/token", nil)
 	if err != nil {
 		return "NewRequest: " + err.Error()
 	}

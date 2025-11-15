@@ -218,7 +218,7 @@ func (m Model) View() string {
 		case 1:
 			s = viewDownload(m)
 		case 2:
-			return ""
+			s = viewAuthenticate(m)
 		}
 	}
 
