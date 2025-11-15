@@ -16,9 +16,10 @@ import (
 	"sort"
 )
 
-const (
-	dotChar  = " • "
-	JudgeURL = "http://localhost:8080"
+var (
+	dotChar     = " • "
+	DevJudgeURL = "http://localhost:8080"
+	JudgeURL    = "https://judge.resamvi.io"
 )
 
 var (
@@ -68,7 +69,11 @@ var (
 	Exercises  map[string]string
 )
 
-func NewModel() Model {
+func NewModel(dev bool) Model {
+	if dev {
+		JudgeURL = DevJudgeURL
+	}
+
 	ti := textinput.New()
 	ti.Placeholder = "7e41c20a-37df-4dd5-b43c-d112a0f9dc1f"
 	ti.Prompt = "Token: "
@@ -93,7 +98,11 @@ func NewModel() Model {
 		}
 	}
 
-	l := list.New(folders, itemDelegate{}, 38, len(folders)*3)
+	if len(folders) == 0 {
+		folders = append(folders, item(nothingFound))
+	}
+
+	l := list.New(folders, itemDelegate{}, 38, 8)
 	l.Title = "Wähle den Ordner zum Hochladen aus"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)

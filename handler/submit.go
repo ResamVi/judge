@@ -57,10 +57,6 @@ func (k Handler) Submit(c echo.Context) error {
 	// == Build & run code ==
 	go k.executeSubmission(user, destDir, exercise, code)
 
-	// IMPORTANT TODO: timeout for command
-
-	// TODO: Only keep 20 most recent submissions
-
 	return c.NoContent(http.StatusOK)
 }
 
@@ -132,6 +128,11 @@ func (k Handler) executeSubmission(user db.User, destDir, exercise, code string)
 	})
 	if err != nil {
 		slog.Error("failed to create submission", "username", user.Username, "userId", user.ID, "exercise", exercise, "error", err.Error())
+	}
+
+	err = os.RemoveAll(destDir)
+	if err != nil {
+		slog.Error("failed to remove folder", "destDir", destDir, "error", err.Error())
 	}
 }
 

@@ -94,8 +94,14 @@ func uploadCmd(token, value string) tea.Cmd {
 	}
 }
 
+const nothingFound = "Keine Ordner gefunden hier. Bitte navigiere zuerst zum Ordner mit der Übung"
+
 func uploadFolder(token, directoryName string) string {
 	time.Sleep(1 * time.Second)
+
+	if directoryName == nothingFound {
+		return nothingFound
+	}
 
 	path, err := os.Getwd()
 	if err != nil {

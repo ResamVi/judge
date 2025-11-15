@@ -73,13 +73,11 @@ func Init(url string, adminPassword string, environment string) (*Queries, error
 		}
 	}
 
-	//if len(entries) != len(handler.Grading) {
-	//	return nil, fmt.Errorf("exercises in fs: %d exercises in code: %d", len(entries), len(handler.Exercises))
-	//}
-
-	err = initializeTestdata(ctx, queries)
-	if err != nil {
-		return nil, fmt.Errorf("could not initialize testdata: %w", err)
+	if environment == "development" {
+		err = initializeTestdata(ctx, queries)
+		if err != nil {
+			return nil, fmt.Errorf("could not initialize testdata: %w", err)
+		}
 	}
 
 	return queries, nil

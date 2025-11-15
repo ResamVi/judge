@@ -31,35 +31,11 @@ Die Aufgabe ist entworfen, um dir Übung beim Kompilieren und Ausführen von Go 
 `judge download 01`
 
 
-## Schritte
+## Ratschläge
 
 1. Öffne die Eingabeaufforderung
 
-![img](/exercises/01-compiler/image.png) TODO: Besseres Bild
-
-2. Navigiere zu deinem `vhs` Ordner. Dazu hier ein Beispiel, um zwischen Ordnern zu navigieren:
+2. Mit den Befehlen `dir` und `cd` navigiere zum Ordner wo die `main.go` liegt
 
 Schauen welche Inhalte der Ordner hat
-```powershell
-C:\Users\Julien> ls
-Desktop Bilder Videos
-```
-
-Den nächsten Ordner auswählen
-```powershell
-C:\Users\Julien> cd Desktop
-```
-
-Nochmal schauen
-```powershell
-C:\Users\Julien\Desktop> ls
-vhs 
-```
-
-Wiederholen bis man am richtigen Ort ist
-```powershell
-C:\Users\Julien\Desktop> cd vhs
-C:\Users\Julien\Desktop\vhs> cd 01
-C:\Users\Julien\Desktop\vhs\01> go run main.go
-```
 
