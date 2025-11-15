@@ -1,4 +1,4 @@
-name: Build/Push Client
+name: Build and Push to GHCR
 
 on:
   push:
@@ -6,37 +6,38 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: set lower case owner name
-        run: |
-          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
-        env:
-          OWNER: '${{ github.repository_owner }}'
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Login to Github Container Registry
-        uses: docker/login-action@v1
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker image (client)
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ghcr.io/${{ OWNER_LC }}/judge-server:${{ github.sha }}, ghcr.io/${{ OWNER_LC }}/judge-server:latest
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-      - name: Set up kubeconfig
+
+      - name: Set image metadata
+        id: meta
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          kubectl config set-context --current --namespace=default
-      - name: Deploy to Kubernetes
+          IMAGE=ghcr.io/${{ github.repository }}/judge-server
+          SHA_TAG=${GITHUB_SHA::7}
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "sha_tag=$SHA_TAG" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
         run: |
-          kubectl rollout restart deployment/judge-server
+          docker build \
+            -t ${{ steps.meta.outputs.image }}:latest \
+            -t ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha_tag }} \
+            .
+
+      - name: Push both tags
+        run: |
+          docker push ${{ steps.meta.outputs.image }}:latest
+          docker push ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha_tag }}
