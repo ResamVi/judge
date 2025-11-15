@@ -14,15 +14,15 @@ import (
 
 func (k Handler) Homepage(c echo.Context) error {
 	// Contents of homepage comes from README.md file
-	taskMD, err := os.ReadFile("www/README.md")
+	exerciseMD, err := os.ReadFile("www/README.md")
 	if err != nil {
 		slog.Error("os.ReadFile: " + err.Error())
 		return err
 	}
 
 	// Convert local markdown files to HTML
-	var taskHTML bytes.Buffer
-	if err := md.Convert(taskMD, &taskHTML); err != nil {
+	var exerciseHTML bytes.Buffer
+	if err := md.Convert(exerciseMD, &exerciseHTML); err != nil {
 		slog.Error("md.Convert: " + err.Error())
 		return err
 	}
@@ -36,7 +36,7 @@ func (k Handler) Homepage(c echo.Context) error {
 			slog.Error("failed to generate status HTML", "error", err)
 			return err
 		}
-		result = strings.ReplaceAll(taskHTML.String(), "{{Status}}", statusHTML)
+		result = strings.ReplaceAll(exerciseHTML.String(), "{{Status}}", statusHTML)
 
 		// Replace {{Token}} in webpage with user's token
 		user, err := k.db.GetUser(c.Request().Context(), cookie.Value)
@@ -46,7 +46,7 @@ func (k Handler) Homepage(c echo.Context) error {
 		}
 		result = strings.ReplaceAll(result, "{{Token}}", user.Token)
 	} else {
-		result = strings.ReplaceAll(taskHTML.String(), "{{Status}}", "")
+		result = strings.ReplaceAll(exerciseHTML.String(), "{{Status}}", "")
 		result = strings.ReplaceAll(result, "{{Token}}", "<Ein Token wird hier sichtbar sein sobald du dich eingeloggt hast>")
 	}
 

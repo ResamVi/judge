@@ -96,7 +96,7 @@ func downloadExercise(token, exercise string) string {
 		return "Ordner existiert schon"
 	}
 
-	req, err := http.NewRequest(http.MethodGet, JudgeURL+"/tasks/"+fileName+"/code", nil)
+	req, err := http.NewRequest(http.MethodGet, JudgeURL+"/exercises/"+fileName+"/code", nil)
 	if err != nil {
 		return "NewRequest: " + err.Error()
 	}

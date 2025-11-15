@@ -12,15 +12,15 @@ import (
 	"github.com/plouc/textree"
 )
 
-func (k Handler) TaskHandler(c echo.Context) error {
+func (k Handler) ExerciseHandler(c echo.Context) error {
 	// Convert local markdown files to HTML
-	taskMD, err := os.ReadFile("tasks/" + c.Param("task") + "/README.md")
+	exerciseMD, err := os.ReadFile("exercises/" + c.Param("exercise") + "/README.md")
 	if err != nil {
 		slog.Error("os.ReadFile: " + err.Error())
 		return c.NoContent(http.StatusNotFound)
 	}
-	var taskHTML bytes.Buffer
-	if err := md.Convert(taskMD, &taskHTML); err != nil {
+	var exerciseHTML bytes.Buffer
+	if err := md.Convert(exerciseMD, &exerciseHTML); err != nil {
 		slog.Error("md.Convert: " + err.Error())
 		return err
 	}
@@ -37,9 +37,9 @@ func (k Handler) TaskHandler(c echo.Context) error {
 				%s
 				</div>
 			</div>
-		</div>`, treeView(c.Param("task")), codeView(c.Param("task")))
+		</div>`, treeView(c.Param("exercise")), codeView(c.Param("exercise")))
 
-	result := strings.ReplaceAll(taskHTML.String(), "{{Code}}", htm)
+	result := strings.ReplaceAll(exerciseHTML.String(), "{{Code}}", htm)
 
 	data := k.page
 	data.Body = result
@@ -48,7 +48,7 @@ func (k Handler) TaskHandler(c echo.Context) error {
 }
 
 func treeView(name string) string {
-	tree, err := textree.TreeFromDir("./tasks/" + name + "/code")
+	tree, err := textree.TreeFromDir("./exercises/" + name + "/code")
 	if err != nil {
 		panic(err)
 	}
@@ -64,14 +64,14 @@ func treeView(name string) string {
 }
 
 func codeView(name string) string {
-	entries, err := os.ReadDir("./tasks/" + name + "/code")
+	entries, err := os.ReadDir("./exercises/" + name + "/code")
 	if err != nil {
 		panic(err)
 	}
 
 	code := ""
 	for _, e := range entries {
-		content, err := os.ReadFile("./tasks/" + name + "/code/" + e.Name())
+		content, err := os.ReadFile("./exercises/" + name + "/code/" + e.Name())
 		if err != nil {
 			panic(err)
 		}
@@ -85,7 +85,7 @@ func codeView(name string) string {
 	return code
 }
 
-func (k Handler) TaskList(c echo.Context) error {
+func (k Handler) ExerciseList(c echo.Context) error {
 	exercises, err := k.db.GetExercises(c.Request().Context())
 	if err != nil {
 		slog.Error("db.GetExercises: " + err.Error())

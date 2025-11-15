@@ -43,13 +43,13 @@ func Init(url string, adminPassword string, environment string) (*Queries, error
 	}
 
 	// Initialize exercises
-	entries, err := os.ReadDir("tasks")
+	entries, err := os.ReadDir("exercises")
 	if err != nil {
-		return nil, fmt.Errorf("read dir of tasks: %w", err)
+		return nil, fmt.Errorf("read dir of exercises: %w", err)
 	}
 
 	for _, e := range entries {
-		file, err := os.ReadFile("tasks/" + e.Name() + "/README.md")
+		file, err := os.ReadFile("exercises/" + e.Name() + "/README.md")
 		if err != nil {
 			return nil, fmt.Errorf("read README.md of folder: %w", err)
 		}
@@ -106,7 +106,7 @@ func initializeTestdata(ctx context.Context, queries *Queries) error {
 		return fmt.Errorf("failed creating anna: %w", err)
 	}
 	err = queries.CreateSubmission(ctx, CreateSubmissionParams{
-		UserID:     1,
+		UserID:     2,
 		ExerciseID: "01-compiler",
 		Code:       "package main",
 		Output:     "Hello World!",
@@ -117,7 +117,7 @@ func initializeTestdata(ctx context.Context, queries *Queries) error {
 		return fmt.Errorf("failed creating lou solving: %w", err)
 	}
 	err = queries.CreateSubmission(ctx, CreateSubmissionParams{
-		UserID:     2,
+		UserID:     3,
 		ExerciseID: "01-compiler",
 		Code:       "package main\n\nfunc main() {\n\tfmt.Println(\"Hello World!\")\n}",
 		Output:     "Hello World!",

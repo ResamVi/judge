@@ -63,15 +63,15 @@ func main() {
 		panic(err)
 	}
 
-	// TODO: should be consistently "exercises" not "tasks" (low)
+	// TODO: should be consistently "exercises" not "exercises" (low)
 	e.GET("/", h.Homepage)
 	e.GET("/login", h.LoginView)
 	e.GET("/register", h.RegisterView)
 	e.GET("/token", h.Token)
-	e.GET("/tasks", h.TaskList)
-	e.GET("/tasks/:task", h.TaskHandler)
-	e.GET("/tasks/:task/code", CodeHandler)
-	e.GET("/submission/:task/:user", h.Submission)
+	e.GET("/exercises", h.ExerciseList)
+	e.GET("/exercises/:exercise", h.ExerciseHandler)
+	e.GET("/exercises/:exercise/code", CodeHandler)
+	e.GET("/submission/:exercise/:user", h.Submission)
 
 	e.POST("/submission", h.Submit)
 	e.POST("/login", h.Login)
@@ -82,7 +82,7 @@ func main() {
 	e.POST("/validate/password", h.ValidatePassword)
 	e.POST("/validate/confirm", h.ValidateConfirmation)
 
-	e.Static("/tasks", "tasks")
+	e.Static("/exercises", "exercises")
 	e.Static("/www", "www")
 
 	e.Logger.Fatal(e.Start(":8080"))
@@ -106,7 +106,7 @@ func CodeHandler(c echo.Context) error {
 		}
 		defer file.Close()
 
-		strippedPath := strings.TrimPrefix(path, "tasks/"+c.Param("task")+"/code/")
+		strippedPath := strings.TrimPrefix(path, "exercises/"+c.Param("exercise")+"/code/")
 
 		f, err := w.Create(strippedPath)
 		if err != nil {
@@ -121,7 +121,7 @@ func CodeHandler(c echo.Context) error {
 		return nil
 	}
 
-	err := filepath.Walk("tasks/"+c.Param("task")+"/code", walker)
+	err := filepath.Walk("exercises/"+c.Param("exercise")+"/code", walker)
 	if err != nil {
 		panic(err)
 	}

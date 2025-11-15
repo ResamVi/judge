@@ -30,7 +30,7 @@ judge upload 02
 
 1. Öffne die Eingabeaufforderung
 
-![img](/tasks/01-compiler/image.png) TODO: Besseres Bild
+![img](/exercises/01-compiler/image.png) TODO: Besseres Bild
 
 2. Navigiere zu deinem `vhs` Ordner. Dazu hier ein Beispiel, um zwischen Ordnern zu navigieren:
 

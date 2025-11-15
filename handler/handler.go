@@ -20,7 +20,7 @@ type Page struct {
 	// List of exercises
 	Exercises []MenuItem
 
-	// The main content (derived from markdown files in tasks/)
+	// The main content (derived from markdown files in exercises/)
 	Body string
 }
 
@@ -128,7 +128,7 @@ func getExercises(queries *db.Queries) ([]MenuItem, error) {
 	for _, ex := range exercises {
 		items = append(items, MenuItem{
 			Name: ex.Title,
-			Link: "/tasks/" + ex.ID,
+			Link: "/exercises/" + ex.ID,
 		})
 	}
 

@@ -22,13 +22,13 @@ func (k Handler) Submission(c echo.Context) error {
 		return c.String(http.StatusNotFound, err.Error())
 	}
 
-	task := c.Param("task")
+	exercise := c.Param("exercise")
 	subm, err := k.db.GetSubmission(c.Request().Context(), db.GetSubmissionParams{
 		UserID:     user.ID,
-		ExerciseID: task,
+		ExerciseID: exercise,
 	})
 	if err != nil {
-		slog.Error("could not find submission for user", "task", task, "user", user.Username)
+		slog.Error("could not find submission for user", "exercise", exercise, "user", user.Username)
 		return c.HTML(http.StatusOK, `<div><meta http-equiv="refresh" content="03; url=/">Benutzer hat Aufgabe noch nicht gelöst</div>`)
 	}
 

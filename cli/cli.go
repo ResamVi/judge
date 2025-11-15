@@ -101,7 +101,7 @@ func NewModel() Model {
 	l.Styles.Title = titleStyle
 
 	// List of exercises of judge
-	resp, err := http.Get(JudgeURL + "/tasks")
+	resp, err := http.Get(JudgeURL + "/exercises")
 	if err != nil {
 		panic(err)
 	}
