@@ -63,7 +63,6 @@ func main() {
 		panic(err)
 	}
 
-	// TODO: should be consistently "exercises" not "exercises" (low)
 	e.GET("/", h.Homepage)
 	e.GET("/login", h.LoginView)
 	e.GET("/register", h.RegisterView)

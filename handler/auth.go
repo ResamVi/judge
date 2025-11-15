@@ -19,18 +19,18 @@ func (k Handler) Login(c echo.Context) error {
 
 	user, err := k.db.GetUser(c.Request().Context(), username)
 	if err != nil {
-		slog.Error("Login: user not found") // TODO: field of username
+		slog.Warn("Login: user not found", "username", username, "error", err)
 		return c.NoContent(http.StatusBadRequest)
 	}
 
 	if !user.Approved && k.env == "production" {
-		slog.Error("Login: User not approved", "username", username)
+		slog.Warn("Login: User not approved", "username", username)
 		return c.HTML(http.StatusOK, `<span style="color:red;">Benutzer noch nicht genehmigt.</span><a href="/login"></a>`)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		slog.Error("Login: password does not match") // TODO: error of username
+		slog.Warn("Login: password does not match", "username", username, "error", err)
 		return c.HTML(http.StatusOK, `<span style="color:red;">Anmeldung fehlgeschlagen.</span><a href="/login"></a>`)
 	}
 

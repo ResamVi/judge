@@ -3,7 +3,9 @@ package handler
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/ResamVi/judge/db"
 	"github.com/ResamVi/judge/grading"
@@ -19,7 +21,6 @@ import (
 )
 
 func (k Handler) Submit(c echo.Context) error {
-	// == Unwrap user inputs ==
 	token := c.Request().Header.Get("token")
 	exercise := c.Request().Header.Get("exercise")
 
@@ -35,14 +36,41 @@ func (k Handler) Submit(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	readerAt := bytes.NewReader(data)
-	zr, err := zip.NewReader(readerAt, int64(len(data)))
+	code, err := getCode(data)
 	if err != nil {
-		slog.Error("bad zip data", "error", err.Error())
+		slog.Error("failed to get code", "error", err)
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	// == Store the code in database ==
+	destDir := filepath.Join("submissions", time.Now().Format("2006-01-02T15-04")+"_"+user.Username)
+
+	if err := os.MkdirAll(destDir, os.ModePerm); err != nil {
+		slog.Error("cannot create dest dir", "error", err.Error())
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	if err := unzipBytes(data, destDir); err != nil {
+		slog.Error("unzip failed", "error", err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	// == Build & run code ==
+	go k.executeSubmission(user, destDir, exercise, code)
+
+	// IMPORTANT TODO: timeout for command
+
+	// TODO: Only keep 20 most recent submissions
+
+	return c.NoContent(http.StatusOK)
+}
+
+func getCode(data []byte) (string, error) {
+	readerAt := bytes.NewReader(data)
+	zr, err := zip.NewReader(readerAt, int64(len(data)))
+	if err != nil {
+		return "", fmt.Errorf("bad zip data: %w", err)
+	}
+
 	code := ""
 	for _, f := range zr.File {
 		rc, err := f.Open()
@@ -61,54 +89,50 @@ func (k Handler) Submit(c echo.Context) error {
 		rc.Close()
 	}
 
-	// == Store code locally for execution ==
-	destDir := filepath.Join("submissions", time.Now().Format("2006-01-02T15-04")+"_"+user.Username)
+	return code, nil
+}
 
-	if err := os.MkdirAll(destDir, os.ModePerm); err != nil {
-		slog.Error("cannot create dest dir", "error", err.Error())
-		return c.String(http.StatusBadRequest, err.Error())
-	}
+func (k Handler) executeSubmission(user db.User, destDir, exercise, code string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-	if err := unzipBytes(data, destDir); err != nil {
-		slog.Error("unzip failed", "error", err)
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
+	runCmd := exec.CommandContext(ctx, "go", "run", destDir+"/main.go")
 
-	// == Build & run code ==
-	// IMPORTANT TODO: timeout for command
-	runCmd := exec.Command("go", "run", destDir+"/main.go")
-
-	var buildStderr, output bytes.Buffer
+	var buildStderr, buildStdout bytes.Buffer
 	runCmd.Stderr = &buildStderr
-	runCmd.Stdout = &output
+	runCmd.Stdout = &buildStdout
 
 	var evaluation string
 	var solved grading.Grade
+	var output string
+
 	if err := runCmd.Run(); err != nil {
-		slog.Warn("Build failed", "user", user.Username, "error", buildStderr.String())
-		output = buildStderr
-		evaluation = "❌ Programm konnte nicht kompiliert werden"
+		slog.Warn("submission returned errors", "username", user.Username, "output", buildStderr.String(), "error", err)
 		solved = grading.Attempted
+
+		if errors.Is(err, context.Canceled) {
+			output = buildStderr.String()
+			evaluation = "❌ Programm hat länger als 10 Sekunden gebraucht"
+		} else {
+			output = buildStderr.String()
+			evaluation = "❌ Programm konnte nicht kompiliert werden"
+		}
 	} else {
-		evaluation, solved = grading.GradeSubmission(exercise, code, output.String())
+		output = buildStdout.String()
+		evaluation, solved = grading.GradeSubmission(exercise, code, output)
 	}
 
-	err = k.db.CreateSubmission(c.Request().Context(), db.CreateSubmissionParams{
+	err := k.db.CreateSubmission(context.Background(), db.CreateSubmissionParams{
 		UserID:     user.ID,
 		ExerciseID: exercise,
 		Code:       code,
-		Output:     output.String(),
+		Output:     output,
 		Evaluation: evaluation,
 		Solved:     int32(solved),
 	})
 	if err != nil {
-		slog.Error("failed to create submission", "userId", user.ID, "exercise", exercise, "error", err.Error())
-		return c.String(http.StatusBadRequest, err.Error())
+		slog.Error("failed to create submission", "username", user.Username, "userId", user.ID, "exercise", exercise, "error", err.Error())
 	}
-
-	// TODO: Only keep 20 most recent submissions
-
-	return c.NoContent(http.StatusOK)
 }
 
 // unzipBytes extracts a zip-from-memory into destDir.
