@@ -25,7 +25,7 @@ jobs:
       - name: Set image metadata
         id: meta
         run: |
-          IMAGE="ghcr.io/${GITHUB_REPOSITORY}/app"
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY}"
           IMAGE_LC=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
           SHA_TAG=${GITHUB_SHA::7}
           echo "image=$IMAGE_LC" >> $GITHUB_OUTPUT
