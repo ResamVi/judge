@@ -42,3 +42,18 @@ jobs:
         run: |
           docker push ${{ steps.meta.outputs.image }}:latest
           docker push ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha_tag }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          kubectl config set-context --current --namespace=default
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl rollout restart deployment/judge-server

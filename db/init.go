@@ -105,7 +105,7 @@ func initializeTestdata(ctx context.Context, queries *Queries) error {
 	}
 	err = queries.CreateSubmission(ctx, CreateSubmissionParams{
 		UserID:     2,
-		ExerciseID: "01-compiler",
+		ExerciseID: "01-judge-einrichten",
 		Code:       "package main",
 		Output:     "Hello World!",
 		Evaluation: "❌, Ist noch nicht am funktionieren",
@@ -116,7 +116,7 @@ func initializeTestdata(ctx context.Context, queries *Queries) error {
 	}
 	err = queries.CreateSubmission(ctx, CreateSubmissionParams{
 		UserID:     3,
-		ExerciseID: "01-compiler",
+		ExerciseID: "01-judge-einrichten",
 		Code:       "package main\n\nfunc main() {\n\tfmt.Println(\"Hello World!\")\n}",
 		Output:     "Hello World!",
 		Evaluation: "✅ Ist am funktionieren",

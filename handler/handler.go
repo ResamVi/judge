@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/renderer/html"
-	"log/slog"
 	"net/http"
 )
 
@@ -55,7 +54,6 @@ func New(queries *db.Queries, env string) (*Handler, error) {
 func (k Handler) Username(c echo.Context) error {
 	cookie, err := c.Cookie("username")
 	if err != nil {
-		slog.Info("user not logged in: " + err.Error())
 		return c.HTML(http.StatusOK, `<li class="float-right"><a href="/login">Anmelden</a></li>`)
 	}
 

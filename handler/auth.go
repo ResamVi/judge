@@ -73,10 +73,16 @@ func (k Handler) Register(c echo.Context) error {
 		return c.HTML(http.StatusOK, `<span style="color:red;">Registrierung fehlgeschlagen: Benutzername nicht länger als 12 Zeichen und nur Buchstaben und Zahlen</span><br><a href="/register">Zurück</a>`)
 	}
 
+	approved := false
+	if k.env == "development" {
+		approved = true
+	}
+
 	err = k.db.CreateUser(c.Request().Context(), db.CreateUserParams{
 		Username: username,
 		Password: string(encrypted),
 		Token:    uuid.New().String(),
+		Approved: approved,
 	})
 	if err != nil {
 		slog.Error("Register: could not create user", "error", err)

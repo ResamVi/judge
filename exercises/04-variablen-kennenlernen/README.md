@@ -7,6 +7,7 @@ können.
 
 Folgende Konzepte kennengelernt
 1. Variablen zum speichern von Daten
+2. Variablen deklarieren mit `var` und `:=`
 
 ## Code
 
@@ -14,23 +15,12 @@ Folgende Konzepte kennengelernt
 
 2. Downloade den Code mit:   
 
-```
-judge download 03
-```
-
-
-4. Uploade den Code mit:
-```
-judge upload 04
-```
-
 ## Erinnerung
 
 ```
-name := "Julien"
+<Variablen Name> := <Wert>
 
-var alter int
-alter = 13
+var <Variablen Name> <Typ>
 
-var x, y, z = 1, 2, 3
+var <Variable>, <Variable> = <Wert>, <Wert>
 ```
