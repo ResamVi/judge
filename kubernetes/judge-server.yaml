@@ -48,3 +48,7 @@ spec:
         envFrom:
         - configMapRef:
             name: judge-server-config
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1"

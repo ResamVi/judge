@@ -15,14 +15,19 @@ Die Aufgabe ist entworfen, um den Umgang mit den Judge einzuführen
     - Lade den Code wieder hoch und der Judge wird es benoten
 
 2. Für das Herunterladen und Hochladen deines Codes gibt es ein Programm zur Kommunikation mit dem Judge
-    - Zum installieren von diesem Programm gib folgenden Befehl in die Eingabeaufforderung:  
+    - Zum Installieren gebe folgenden Befehl in die Eingabeaufforderung ein:  
     ```
    go install github.com/ResamVi/judge/cmd/judge@latest
     ```
     - Wenn du jetzt den Befehl `judge` eingibst, solltest du eine Nachricht bekommen
-    todo: bild
 
-3. Im Folgenden ist eine Vorschau vom Code für diese Aufgabe
+3. Die Befehle zum Navigieren durch Ordner im Terminal:
+   - **dir** (directory) Ordnerinhalt ansehen                          
+   - **cd <name>** (change directory) Ordner wechseln             
+   - **cd ..** Einen Ordner zurückspringen
+   - **cls** (clear screen) Terminal aufräumen
+
+4. Im Folgenden ist eine Vorschau vom Code für diese Aufgabe
 
 {{Code}}
 

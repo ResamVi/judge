@@ -76,7 +76,7 @@ func (k Handler) status(ctx context.Context) (string, error) {
 	exercisesHTML := ""
 	for _, exercise := range exercises {
 		exercisesHTML += "<tr>"
-		exercisesHTML += "<td>" + exercise.Title + "</th>"
+		exercisesHTML += fmt.Sprintf(`<td><a href="%s">`+exercise.Title+`</a></th>`, "/exercises/"+exercise.ID)
 
 		status, err := k.db.GetStatus(ctx, exercise.ID)
 		if err != nil {

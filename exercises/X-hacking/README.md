@@ -11,6 +11,13 @@ Musste schnell erkennen, dass Programme die nicht aufhören zu laufen, den Judge
 Lässt man 100 von denen Laufen dann war's das.
 ```
 
+2. Fabian (16. November 2025)
+```
+Hat beim Beta-Test in einer Endlosschleife Goroutinen erstellt die jede 1GB an Speicher allokieren.
+Das brachte nicht nur das Programm zum Crashen sondern der ganze Server war nicht mehr erreichbar und musste
+extern heruntergefahren werden.
+```
+
 ## Code
 
 {{Code}}

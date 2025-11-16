@@ -93,7 +93,9 @@ func downloadExercise(token, exercise string) string {
 
 	err := os.Mkdir(fileName, os.ModePerm)
 	if err != nil {
-		return "Ordner existiert schon"
+		if !isEmpty(fileName) {
+			return fmt.Sprintf("Ordner '%s' existiert schon. Bitte zuerst löschen", fileName)
+		}
 	}
 
 	req, err := http.NewRequest(http.MethodGet, JudgeURL+"/exercises/"+fileName+"/code", nil)
@@ -142,6 +144,21 @@ func downloadExercise(token, exercise string) string {
 	}
 
 	return ""
+}
+
+func isEmpty(dirName string) bool {
+	f, err := os.Open(dirName)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true
+	}
+
+	return false
 }
 
 func readZipFile(zf *zip.File) ([]byte, error) {

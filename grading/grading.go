@@ -61,6 +61,17 @@ var Grading = map[string]Exercise{
 			CodeRegex(`\w+, \w+`, "Mehrere Variablen gleichzeitig wurden deklariert"),
 		},
 	},
+	"X-hacking": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			{
+				Description: "Solange man das liest funktioniert alles noch",
+				Valid: func(code, output string) (string, bool) {
+					return "❌ Der Server steht noch", false
+				},
+			},
+		},
+	},
 }
 
 func CodeWithout(avoid string, explanation string) Criteria {
