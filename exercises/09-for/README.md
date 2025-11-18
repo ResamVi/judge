@@ -45,3 +45,11 @@ for i := 1; i < 10; i++ {
 }
 ```
 This loop will print the numbers from 1 to 9 (including 9). Defining the step is often done using an increment or decrement statement, as shown in the example above.
+
+
+Inkrement / Dekrement
+
+```
+a := 10
+a++ // gleich wie: a += 1
+```

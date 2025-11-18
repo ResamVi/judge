@@ -1,8 +1,12 @@
 package grading
 
 import (
+	"fmt"
+	"io"
 	"log/slog"
+	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -21,6 +25,28 @@ type Exercise struct {
 type Criteria struct {
 	Description string
 	Valid       func(code, output string) (comment string, failed bool)
+}
+
+var Lazy = map[string]func(cmd *exec.Cmd){
+	"01-judge-einrichten":        func(cmd *exec.Cmd) {},
+	"02-hello-world":             func(cmd *exec.Cmd) {},
+	"03-werte-ausgeben":          func(cmd *exec.Cmd) {},
+	"04a-variablen-kennenlernen": func(cmd *exec.Cmd) {},
+	"04b-variablen-tauschen":     func(cmd *exec.Cmd) {},
+	"05-arithmetik": func(cmd *exec.Cmd) {
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			slog.Error("failed to get stdin pipe", "error", err.Error())
+		}
+		go func() {
+			defer stdin.Close()
+			io.WriteString(stdin, "4\n")
+			io.WriteString(stdin, "4\n")
+			io.WriteString(stdin, "5\n")
+		}()
+
+	},
+	"X-hacking": func(cmd *exec.Cmd) {},
 }
 
 var Grading = map[string]Exercise{
@@ -53,7 +79,7 @@ var Grading = map[string]Exercise{
 			CodeWithout(`"42 3.141 Go macht Spaß true"`, "Benutze die Möglichkeit mehrere Werte in fmt.Println zu packen"),
 		},
 	},
-	"04-variablen-kennenlernen": {
+	"04a-variablen-kennenlernen": {
 		Criteria: []Criteria{
 			NoHackingAttempt,
 			CodeRegex(`\w+ :=`, "Kurze Variablen Deklaration vorhanden"),
@@ -61,6 +87,28 @@ var Grading = map[string]Exercise{
 			CodeRegex(`\w+, \w+`, "Mehrere Variablen gleichzeitig wurden deklariert"),
 		},
 	},
+	"04b-variablen-tauschen": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("27 5\n"),
+			CodeRegexNot(`=.+\d+`, "Variablen dürfen nicht einfach anderen Zahlen zugewiesen werden", 5),
+			CodeRegex(`fmt\.Println\(a\, b\)`, "fmt.Println wurde nicht verändert"),
+		},
+	},
+
+	"05-arithmetik": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches(`Was ist deine Note in Geometrie?
+Was ist deine Note in Algebra?
+Was ist deine Note in Physik?
+Dein Notendurchschnitt:
+4.3333335
+false
+`),
+		},
+	},
+
 	"X-hacking": {
 		Criteria: []Criteria{
 			NoHackingAttempt,
@@ -87,10 +135,27 @@ func CodeWithout(avoid string, explanation string) Criteria {
 	}
 }
 
-func CodeRegex(expected string, explanation string) Criteria {
+func CodeRegexNot(expected string, explanation string, ignored ...int) Criteria {
 	return Criteria{
 		Description: "Ausgabe des Programms ist wie erwartet",
 		Valid: func(code, output string) (string, bool) {
+			code = removeLines(code, ignored)
+
+			if !regexp.MustCompile(expected).MatchString(code) {
+				return "✅ Programm erfüllt Anforderung (<i>" + explanation + "</i>)", true
+			}
+
+			return "❌ Program erfüllt Anforderung nicht (<i>" + explanation + "</i>)", false
+		},
+	}
+}
+
+func CodeRegex(expected string, explanation string, ignored ...int) Criteria {
+	return Criteria{
+		Description: "Ausgabe des Programms ist wie erwartet",
+		Valid: func(code, output string) (string, bool) {
+			code = removeLines(code, ignored)
+
 			if regexp.MustCompile(expected).MatchString(code) {
 				return "✅ Programm erfüllt Anforderung (<i>" + explanation + "</i>)", true
 			}
@@ -132,6 +197,8 @@ var NoHackingAttempt = Criteria{
 }
 
 func GradeSubmission(exercise string, code string, output string) (string, Grade) {
+	fmt.Println(output)
+
 	criteria, ok := Grading[exercise]
 	if !ok {
 		return "Unbekannt: " + exercise, NotAttempted
@@ -149,4 +216,20 @@ func GradeSubmission(exercise string, code string, output string) (string, Grade
 	}
 
 	return evaluation, solved
+}
+
+func removeLines(code string, indices []int) string {
+	lines := strings.Split(code, "\n")
+
+	// Sort indices descending so removal does not shift early indexes
+	sort.Sort(sort.Reverse(sort.IntSlice(indices)))
+
+	for _, n := range indices {
+		if n < 0 || n >= len(lines) {
+			continue // ignore invalid
+		}
+		lines = append(lines[:n], lines[n+1:]...)
+	}
+
+	return strings.Join(lines, "\n")
 }

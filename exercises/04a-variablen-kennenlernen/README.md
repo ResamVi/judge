@@ -6,7 +6,7 @@ können.
 ## Ziel
 
 Folgende Konzepte kennengelernt
-1. Variablen zum speichern von Daten
+1. Variablen zum Speichern von Daten
 2. Variablen deklarieren mit `var` und `:=`
 
 ## Code

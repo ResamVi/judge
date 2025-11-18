@@ -98,6 +98,11 @@ func (k Handler) executeSubmission(user db.User, destDir, exercise, code string)
 	runCmd.Stderr = &buildStderr
 	runCmd.Stdout = &buildStdout
 
+	if f, ok := grading.Lazy[exercise]; ok {
+		go f(runCmd)
+		time.Sleep(1 * time.Second) // TODO: lol
+	}
+
 	var evaluation string
 	var solved grading.Grade
 	var output string

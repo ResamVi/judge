@@ -49,6 +49,9 @@ spec:
         - configMapRef:
             name: judge-server-config
         resources:
+          requests:
+            memory: "500Mi"
+            cpu: "0.5"
           limits:
-            memory: "2Gi"
+            memory: "1Gi"
             cpu: "1"

@@ -1,0 +1,33 @@
+# Lasagne kochen
+
+In dieser Aufgabe wurde ein Prinz von bösen Rittern gekidnappt. Um die beste Rettungsaktion zu finden schreibt ihr ein Programm.
+
+## Ziel
+
+Folgende Konzepte kennengelernt
+1. Boolean Logik
+
+## Code
+
+{{Code}}
+
+## Erinnerung
+
+Operationen
+```
+eins := true && true // true
+zwei := true && false // false
+
+drei := true || false // true
+vier := false || false // false
+
+fünf := !true // false
+fünf := !false // true
+```
+
+Funktionen
+```
+func hi(name string) string {
+    return "hi " + name
+}
+```
