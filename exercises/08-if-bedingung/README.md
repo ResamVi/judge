@@ -1,11 +1,13 @@
-# Autokauf
+# If-Bedingung
 
 In dieser Übung wollen wir ein Auto kaufen und schreiben ein Programm,
 welches unsere **Entscheidung** übernimmt
 
-Es gibt drei Aufgaben. Eines entscheidet, ob du einen Führerschein brauchst, 
-eines hilft dir zwischen zwei Autos zu entscheiden und das letzte hilft dir einen
-akzeptablen Preis für ein Gebrauchtwagen zu finden.
+Es gibt zwei Aufgaben: 
+- Eine Funktion die entscheidet, ob du einen Führerschein brauchst für das Fahrzeug
+- Eine Funktion die entscheidet, was ein akzeptabler Preis ist für ein Gebrauchtwagen
+
+Genaue Anweisung im Code
 
 ## Ziel
 
@@ -14,18 +16,6 @@ akzeptablen Preis für ein Gebrauchtwagen zu finden.
 ## Code
 
 {{Code}}
-
-2. Downloade den Code mit:   
-
-```
-judge download 07
-```
-
-
-3. Uploade den Code mit:
-```
-judge upload 07
-```
 
 ## Erinnerung
 

@@ -1,4 +1,4 @@
-# Blackjack
+# Switch
 
 In dieser Übung simulieren wir den ersten Zug einer Blackjack-Runde.
 
@@ -17,7 +17,7 @@ Sechs 	6 	König 	10
 Sieben 	7
 ```
 
-In Wirklichkeit zählen Asse entweder 11 oder 1 sind aber für die Einfachheit nur 11 in dieser Aufgabe
+(In Wirklichkeit zählen Asse entweder 11 oder 1 sind aber für die Einfachheit nur 11 in dieser Aufgabe)
 
 ## Ziel
 
@@ -27,31 +27,19 @@ In Wirklichkeit zählen Asse entweder 11 oder 1 sind aber für die Einfachheit n
 
 {{Code}}
 
-2. Downloade den Code mit:   
-
-```
-judge download 08
-```
-
-
-3. Uploade den Code mit:
-```
-judge upload 08
-```
-
 ## Erinnerung
 
 Switch-Bedingungen
 ```
-switch operatingSystem {
+switch betriebssystem {
 case "windows":
-    // do something if the operating system is windows
+    fmt.Println("Programm ist eine .exe")
 case "linux":
-    // do something if the operating system is linux
+    fmt.Println("Programm ist eine ./binary")
 case "macos":
-    // do something if the operating system is macos
+    fmt.Println("Programm ist eine ./binary")
 default:
-    // do something if the operating system is none of the above
+    fmt.Println("Programm ist unbekannt")
 }
 ```
 

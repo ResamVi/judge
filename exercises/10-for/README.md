@@ -1,3 +1,5 @@
+Write a program that asks the user for a number n and prints the sum of the numbers 1 to n
+
 # Vögel beobachten
 
 You are an avid bird watcher that keeps track of how many birds have visited your garden. 

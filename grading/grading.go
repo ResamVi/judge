@@ -1,7 +1,6 @@
 package grading
 
 import (
-	"fmt"
 	"io"
 	"log/slog"
 	"os/exec"
@@ -27,12 +26,8 @@ type Criteria struct {
 	Valid       func(code, output string) (comment string, failed bool)
 }
 
+// Lazy because I cba to do this cleaner
 var Lazy = map[string]func(cmd *exec.Cmd){
-	"01-judge-einrichten":        func(cmd *exec.Cmd) {},
-	"02-hello-world":             func(cmd *exec.Cmd) {},
-	"03-werte-ausgeben":          func(cmd *exec.Cmd) {},
-	"04a-variablen-kennenlernen": func(cmd *exec.Cmd) {},
-	"04b-variablen-tauschen":     func(cmd *exec.Cmd) {},
 	"05-arithmetik": func(cmd *exec.Cmd) {
 		stdin, err := cmd.StdinPipe()
 		if err != nil {
@@ -46,7 +41,6 @@ var Lazy = map[string]func(cmd *exec.Cmd){
 		}()
 
 	},
-	"X-hacking": func(cmd *exec.Cmd) {},
 }
 
 var Grading = map[string]Exercise{
@@ -63,12 +57,14 @@ var Grading = map[string]Exercise{
 			},
 		},
 	},
+
 	"02-hello-world": {
 		Criteria: []Criteria{
 			NoHackingAttempt,
 			OutputMatches("Hello World!\n"),
 		},
 	},
+
 	"03-werte-ausgeben": {
 		Criteria: []Criteria{
 			NoHackingAttempt,
@@ -79,6 +75,7 @@ var Grading = map[string]Exercise{
 			CodeWithout(`"42 3.141 Go macht Spaß true"`, "Benutze die Möglichkeit mehrere Werte in fmt.Println zu packen"),
 		},
 	},
+
 	"04a-variablen-kennenlernen": {
 		Criteria: []Criteria{
 			NoHackingAttempt,
@@ -87,6 +84,7 @@ var Grading = map[string]Exercise{
 			CodeRegex(`\w+, \w+`, "Mehrere Variablen gleichzeitig wurden deklariert"),
 		},
 	},
+
 	"04b-variablen-tauschen": {
 		Criteria: []Criteria{
 			NoHackingAttempt,
@@ -106,6 +104,77 @@ Dein Notendurchschnitt:
 4.3333335
 false
 `),
+		},
+	},
+
+	"06-funktionen": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("690\n830\n460\n"),
+			CodeRegex(`fmt.Println\(berechneGehalt\(10\, 3\)\)`, "fmt.Println(10, 3) wurde nicht verändert"),
+			CodeRegex(`fmt.Println\(berechneGehalt\(20\, 1\)\)`, "fmt.Println(20, 1) wurde nicht verändert"),
+			CodeRegex(`fmt.Println\(berechneGehalt\(3\, 0\)\)`, "fmt.Println(3, 0) wurde nicht verändert"),
+		},
+	},
+
+	"07-booleans": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches(`Hat ein Ticket: true
+Ist VIP: true
+Hat weder Ticket noch VIP: false
+Nicht eingesteckt: false
+Nicht angeschalten: false
+Eingesteckt und angeschalten: true
+Name enthält Zahlen: false
+Name enthält keine Zahlen: true
+101 Grad: true
+100 Grad: false
+99 Grad: false
+`),
+			CodeWith(`fmt.Printf("Hat ein Ticket: %v\n", eintrittErlaubt(true, false))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("Ist VIP: %v\n", eintrittErlaubt(false, true))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("Hat weder Ticket noch VIP: %v\n", eintrittErlaubt(false, false))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("Nicht eingesteckt: %v\n", computerLäuft(false, true))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("Nicht angeschalten: %v\n", computerLäuft(true, false))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("Eingesteckt und angeschalten: %v\n", computerLäuft(true, true))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("Name enthält Zahlen: %v\n", nameValide(true))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("Name enthält keine Zahlen: %v\n", nameValide(false))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("101 Grad: %v\n", istHeiß(101))`, "fmt.Print wurde nicht verändert"),
+			CodeWith(`fmt.Printf("100 Grad: %v\n", istHeiß(100))`, "fmt.Printf wurde nicht verändert"),
+			CodeWith(`fmt.Printf("99 Grad: %v\n", istHeiß(99))`, "fmt.Printf wurde nicht verändert"),
+		},
+	},
+
+	"08-if-bedingung": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("true\nfalse\ntrue\n800\n700\n500\n"),
+			CodeWith(`func main() {
+	fmt.Println(brauchtFührerschein("auto"))
+	fmt.Println(brauchtFührerschein("fahrrad"))
+	fmt.Println(brauchtFührerschein("lkw"))
+
+	fmt.Println(schätzeWert(1000, 1))
+	fmt.Println(schätzeWert(1000, 5))
+	fmt.Println(schätzeWert(1000, 15))
+}`, "Die main Funktion wurde nicht verändert"),
+		},
+	},
+
+	"09-switch": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("true\nfalse\ntrue\n800\n700\n500\n"),
+			CodeWith(`func main() {
+	fmt.Println(brauchtFührerschein("auto"))
+	fmt.Println(brauchtFührerschein("fahrrad"))
+	fmt.Println(brauchtFührerschein("lkw"))
+
+	fmt.Println(schätzeWert(1000, 1))
+	fmt.Println(schätzeWert(1000, 5))
+	fmt.Println(schätzeWert(1000, 15))
+}`, "Die main Funktion wurde nicht verändert"),
 		},
 	},
 
@@ -131,6 +200,21 @@ func CodeWithout(avoid string, explanation string) Criteria {
 			}
 
 			return "❌ Program enthält unerwünschten Code (<i>" + explanation + "</i>)", false
+		},
+	}
+}
+
+func CodeWith(expected string, explanation string, ignored ...int) Criteria {
+	return Criteria{
+		Description: "Ausgabe des Programms ist wie erwartet",
+		Valid: func(code, output string) (string, bool) {
+			code = removeLines(code, ignored)
+
+			if strings.Contains(code, expected) {
+				return "✅ Programm erfüllt Anforderung (<i>" + explanation + "</i>)", true
+			}
+
+			return "❌ Program erfüllt Anforderung nicht (<i>" + explanation + "</i>)", false
 		},
 	}
 }
@@ -183,7 +267,10 @@ var NoHackingAttempt = Criteria{
 	Description: "Hat keine unzulässigen Systemzugriffe",
 	Valid: func(code, output string) (string, bool) {
 		patterns := []string{
-			`(?i)(subprocess|exec\.|shell|eval|child_process)`, // any shell execution commands to spawn new processes
+			`(?i)subprocess`,                     // any shell execution commands to spawn new processes
+			`(?i)exec\.`,                         // any shell execution commands to spawn new processes
+			`(?i)shell`,                          // any shell execution commands to spawn new processes
+			`eval`,                               // any shell execution commands to spawn new processes
 			`(?i)("os")`,                         // operating system operations can stop program/create big files/read filesystem
 			`(?i)(net\.Listen|net\.Dial|http\.)`, // net/http calls can communicate with remote servers
 		}
@@ -197,8 +284,6 @@ var NoHackingAttempt = Criteria{
 }
 
 func GradeSubmission(exercise string, code string, output string) (string, Grade) {
-	fmt.Println(output)
-
 	criteria, ok := Grading[exercise]
 	if !ok {
 		return "Unbekannt: " + exercise, NotAttempted

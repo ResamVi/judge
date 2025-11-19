@@ -1,6 +1,18 @@
-# Lasagne kochen
+# Booleans
 
-In dieser Aufgabe wurde ein Prinz von bösen Rittern gekidnappt. Um die beste Rettungsaktion zu finden schreibt ihr ein Programm.
+Schreibe folgende Funktionen:
+
+- Erste Funktion: **eintrittErlaubt(hatTicket bool, istVIP bool) bool**  
+Ausgabe: Der Eintritt ist erlaubt, wenn die Person ein Ticket hat oder VIP ist
+
+- Zweite Funktion: **computerLäuft(eingesteckt bool, angeschalten bool) bool**  
+Ausgabe: Der Computer läuft, wenn der Stecker eingesteckt ist und angeschalten wurde
+
+- Dritte Funktion: **nameValide(enthältZahlen bool) bool**  
+Ausgabe: Ein Name ist valide, wenn es keine Zahlen beinhaltet
+
+- Vierte Funktion: **istHeiß(temperatur int) bool**  
+Ausgabe: Die Temperatur ist heiß wenn sie über 100 Grad enthält
 
 ## Ziel
 
@@ -22,7 +34,7 @@ drei := true || false // true
 vier := false || false // false
 
 fünf := !true // false
-fünf := !false // true
+sechs := !false // true
 ```
 
 Funktionen

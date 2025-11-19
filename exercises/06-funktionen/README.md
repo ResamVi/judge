@@ -1,45 +1,43 @@
-# Rettungsaktion
+# Funktionen
 
-In dieser Aufgabe wurde ein Prinz von bösen Rittern gekidnappt. Um die beste Rettungsaktion zu finden schreibt ihr ein Programm.
+In einem Unternehmen berechnet sich das monatliche Gehalt eines Angestellten wie folgt:
+Mindestlohn 400€ im Monat,
++ zuzüglich 20€ multipliziert mit der Anzahl der Beschäftigungsjahre,
++ zuzüglich 30€ für jedes Kind.
+  Aufgabe: Schreibe eine Funktion 'berechneGehalt' mit erstem Parameter die Beschäftigungsjahre und zweitem Parameter die Anzahl der Kinder und welches das Gehalt zurückgibt
 
 ## Ziel
 
 Folgende Konzepte kennengelernt
-1. Boolean Logik
+1. Funktionen
 
 ## Code
 
 {{Code}}
 
-2. Downloade den Code mit:   
-
-```
-judge download 04
-```
-
-
-4. Uploade den Code mit:
-```
-judge upload 04
-```
-
 ## Erinnerung
 
 Operationen
 ```
-eins := true && true // true
-zwei := true && false // false
+func Hello(name string) string {
+    return "Hallo " + name
+}
 
-drei := true || false // true
-vier := false || false // false
+func HelloAndGoodbye(name string) (string, string) {
+    return "Hallo " + name, "Tschüss " + name
+}
 
-fünf := !true // false
-fünf := !false // true
-```
+func main() {
+    greeting := Hello("Julien")
+    fmt.Println(greeting)
 
-Funktionen
-```
-func hi(name string) string {
-    return "hi " + name
+    hello, goodbye := HelloAndGoodbye("Louisa")
+    fmt.Println(hello)
+    fmt.Println(goodbye)
+
+    // Ausgabe:
+    // Hallo Julien
+    // Hallo Louisa
+    // Tschüss Louisa
 }
 ```

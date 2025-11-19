@@ -19,16 +19,26 @@ func main() {
 	fmt.Printf("99 Grad: %v\n", istHeiß(99))
 }
 
-// -- Ab hier anfangen
-
 // Erste Funktion: eintrittErlaubt(hatTicket bool, istVIP bool) bool
 // Ausgabe: Der Eintritt ist erlaubt, wenn die Person ein Ticket hat oder VIP ist
+func eintrittErlaubt(hatTicket bool, istVIP bool) bool {
+	return hatTicket || istVIP
+}
 
 // Zweite Funktion: computerLäuft(eingesteckt bool, angeschalten bool) bool
 // Ausgabe: Der Computer läuft, wenn der Stecker eingesteckt ist und angeschalten wurde
+func computerLäuft(eingesteckt bool, angeschalten bool) bool {
+	return eingesteckt && angeschalten
+}
 
 // Dritte Funktion: nameValide(enthältZahlen bool) bool
 // Ausgabe: Ein Name ist valide, wenn es keine Zahlen beinhaltet
+func nameValide(enthähltZahlen bool) bool {
+	return !enthähltZahlen
+}
 
 // Vierte Funktion: istHeiß(temperatur int) bool
 // Ausgabe: Die Temperatur ist heiß wenn sie über 100 Grad enthält
+func istHeiß(temperatur int) bool {
+	return temperatur > 100
+}

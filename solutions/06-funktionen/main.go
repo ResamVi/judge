@@ -17,3 +17,6 @@ func main() {
 //
 // Aufgabe: Schreibe eine Funktion 'berechneGehalt' mit erstem Parameter die Beschäftigungsjahre
 // und zweitem Parameter die Anzahl der Kinder und welches das Gehalt zurückgibt
+func berechneGehalt(jahre int, kinder int) int {
+	return 400 + 20*jahre + 30*kinder
+}

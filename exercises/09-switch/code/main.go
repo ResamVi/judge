@@ -11,12 +11,12 @@ func main() {
 	fmt.Println(kartenwert("dame"))
 }
 
-// TODO: Definiere eine Funktion 'kartenwert'.
+// Definiere eine Funktion 'kartenwert'.
 // - Die Funktion nimmt einen Parameter:
 //		- Der Name der Karte
 // - Die Funktion soll den Wert der Karte zurückgeben
 
-// TODO: Definiere eine Funktion 'ersterZug'
+// Definiere eine Funktion 'ersterZug'
 // - Die Funktion nimmt drei Parameter:
 //		- Der Name deiner ersten Karte
 //		- Der Name deiner zweiten Karte
