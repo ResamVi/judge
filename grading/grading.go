@@ -165,15 +165,22 @@ Name enthält keine Zahlen: true
 	"09-switch": {
 		Criteria: []Criteria{
 			NoHackingAttempt,
-			OutputMatches("true\nfalse\ntrue\n800\n700\n500\n"),
+			OutputMatches("11\n10\n3\n10\n10\n10\n0\nTeilen\nSieg\nKarte\nStehen\nKarte\nStehen\n"),
 			CodeWith(`func main() {
-	fmt.Println(brauchtFührerschein("auto"))
-	fmt.Println(brauchtFührerschein("fahrrad"))
-	fmt.Println(brauchtFührerschein("lkw"))
+	fmt.Println(kartenwert("Ass"))
+	fmt.Println(kartenwert("Zehn"))
+	fmt.Println(kartenwert("Drei"))
+	fmt.Println(kartenwert("König"))
+	fmt.Println(kartenwert("Bube"))
+	fmt.Println(kartenwert("Dame"))
+	fmt.Println(kartenwert("unbekannt"))
 
-	fmt.Println(schätzeWert(1000, 1))
-	fmt.Println(schätzeWert(1000, 5))
-	fmt.Println(schätzeWert(1000, 15))
+	fmt.Println(ersterZug("Ass", "Ass", "Zehn"))
+	fmt.Println(ersterZug("Zehn", "Ass", "Neun"))
+	fmt.Println(ersterZug("Zehn", "Ass", "Zehn"))
+	fmt.Println(ersterZug("Zehn", "Sieben", "Zehn"))
+	fmt.Println(ersterZug("Zehn", "Sechs", "Zehn"))
+	fmt.Println(ersterZug("Zehn", "Sechs", "Drei"))
 }`, "Die main Funktion wurde nicht verändert"),
 		},
 	},

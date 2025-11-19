@@ -33,6 +33,32 @@ func main() {
 // Fünf 	5 	Dame 	10
 // Sechs 	6 	König 	10
 // Sieben 	7
+func kartenwert(s string) int {
+	switch s {
+	case "Zwei":
+		return 2
+	case "Drei":
+		return 3
+	case "Vier":
+		return 4
+	case "Fünf":
+		return 5
+	case "Sechs":
+		return 6
+	case "Sieben":
+		return 7
+	case "Acht":
+		return 8
+	case "Neun":
+		return 9
+	case "Zehn", "Bube", "Dame", "König":
+		return 10
+	case "Ass":
+		return 11
+
+	}
+	return 0
+}
 
 // Definiere eine Funktion 'ersterZug'
 // - Die Funktion nimmt drei Parameter:
@@ -52,3 +78,18 @@ func main() {
 //   - Falls die Summe der Karten 17-20 ist: Stehen
 //   - Falls die Summe der Karten 12-16 ist: Stehen, außer wenn der Dealer 7 oder höher hat
 //   - Falls die Summe der Karten 11 oder kleiner ist: Karte
+func ersterZug(erste string, zweite string, dealer string) string {
+	summe := kartenwert(erste) + kartenwert(zweite)
+	switch {
+	case erste == "Ass" && zweite == "Ass":
+		return "Teilen"
+	case summe == 21 && kartenwert(dealer) != 10:
+		return "Sieg"
+	case summe >= 17 && summe <= 20:
+		return "Stehen"
+	case summe >= 12 && summe <= 16 && kartenwert(dealer) < 7:
+		return "Stehen"
+	default:
+		return "Karte"
+	}
+}
