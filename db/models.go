@@ -16,6 +16,7 @@ type Submission struct {
 	Output     string
 	Evaluation string
 	Solved     int32
+	Attempts   int32
 }
 
 type User struct {

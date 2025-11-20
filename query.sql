@@ -22,7 +22,8 @@ ORDER BY id ASC;
 -- name: GetStatus :many
 SELECT
     u.id AS user_id,
-    COALESCE(s.solved, 0) AS solved
+    COALESCE(s.solved, 0) AS solved,
+    s.attempts
 FROM users u
     LEFT JOIN submissions s
     ON s.user_id = u.id
@@ -59,4 +60,5 @@ SET
     code = EXCLUDED.code,
     output = EXCLUDED.output,
     evaluation = EXCLUDED.evaluation,
-    solved = EXCLUDED.solved;
+    solved = EXCLUDED.solved,
+    attempts = submissions.attempts + 1;

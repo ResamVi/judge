@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rdbell/echo-pretty-logger"
+	"log/slog"
 )
 
 //go:generate go tool sqlc generate
@@ -54,6 +55,7 @@ func main() {
 	e := echo.New()
 	e.Use(prettylogger.Logger)
 	e.Use(middleware.Recover())
+	e.Logger.SetOutput(io.Discard)
 	e.Renderer = &Template{
 		templates: template.Must(template.ParseGlob("www/index.html")),
 	}
@@ -85,6 +87,7 @@ func main() {
 	e.Static("/exercises", "exercises")
 	e.Static("/www", "www")
 
+	slog.Info("Started server")
 	e.Logger.Fatal(e.Start(":8080"))
 }
 

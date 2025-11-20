@@ -1,4 +1,4 @@
-# Rennfahren
+# Structs
 
 In dieser Aufgabe wird ein Rennen organisiert mit Batteriebetriebenen Autos.
 Autos haben verschiedene Geschwindigkeiten und Akkulaufzeiten.

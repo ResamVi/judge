@@ -90,7 +90,7 @@ func (k Handler) status(ctx context.Context) (string, error) {
 			case grading.Attempted:
 				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">❌</a></td>`, exercise.ID, row.UserID)
 			case grading.Solved:
-				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">✔️</a></td>`, exercise.ID, row.UserID)
+				exercisesHTML += fmt.Sprintf(`<td style="text-align:center"><a href="/submission/%s/%d">✔️ (%d)</a></td>`, exercise.ID, row.UserID, row.Attempts.Int32)
 			}
 		}
 		exercisesHTML += "</tr>"

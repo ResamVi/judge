@@ -57,6 +57,7 @@ func (k Handler) Submit(c echo.Context) error {
 	// == Build & run code ==
 	go k.executeSubmission(user, destDir, exercise, code)
 
+	slog.Info("submission received", "user", user.Username, "exercise", exercise)
 	return c.NoContent(http.StatusOK)
 }
 

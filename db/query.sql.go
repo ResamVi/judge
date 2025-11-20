@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createExercise = `-- name: CreateExercise :exec
@@ -37,7 +39,8 @@ SET
     code = EXCLUDED.code,
     output = EXCLUDED.output,
     evaluation = EXCLUDED.evaluation,
-    solved = EXCLUDED.solved
+    solved = EXCLUDED.solved,
+    attempts = submissions.attempts + 1
 `
 
 type CreateSubmissionParams struct {
@@ -114,7 +117,8 @@ func (q *Queries) GetExercises(ctx context.Context) ([]Exercise, error) {
 const getStatus = `-- name: GetStatus :many
 SELECT
     u.id AS user_id,
-    COALESCE(s.solved, 0) AS solved
+    COALESCE(s.solved, 0) AS solved,
+    s.attempts
 FROM users u
     LEFT JOIN submissions s
     ON s.user_id = u.id
@@ -123,8 +127,9 @@ ORDER BY u.id ASC
 `
 
 type GetStatusRow struct {
-	UserID int64
-	Solved int32
+	UserID   int64
+	Solved   int32
+	Attempts pgtype.Int4
 }
 
 func (q *Queries) GetStatus(ctx context.Context, exerciseID string) ([]GetStatusRow, error) {
@@ -136,7 +141,7 @@ func (q *Queries) GetStatus(ctx context.Context, exerciseID string) ([]GetStatus
 	var items []GetStatusRow
 	for rows.Next() {
 		var i GetStatusRow
-		if err := rows.Scan(&i.UserID, &i.Solved); err != nil {
+		if err := rows.Scan(&i.UserID, &i.Solved, &i.Attempts); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -148,7 +153,7 @@ func (q *Queries) GetStatus(ctx context.Context, exerciseID string) ([]GetStatus
 }
 
 const getSubmission = `-- name: GetSubmission :one
-SELECT user_id, exercise_id, code, output, evaluation, solved FROM submissions
+SELECT user_id, exercise_id, code, output, evaluation, solved, attempts FROM submissions
 WHERE user_id = $1 AND exercise_id = $2
 `
 
@@ -167,6 +172,7 @@ func (q *Queries) GetSubmission(ctx context.Context, arg GetSubmissionParams) (S
 		&i.Output,
 		&i.Evaluation,
 		&i.Solved,
+		&i.Attempts,
 	)
 	return i, err
 }

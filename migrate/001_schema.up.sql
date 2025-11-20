@@ -18,5 +18,6 @@ CREATE TABLE submissions (
     output      text        NOT NULL,
     evaluation  text        NOT NULL,
     solved      int         NOT NULL DEFAULT 0,
+    attempts    int         NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, exercise_id)
 );

@@ -20,7 +20,7 @@ func (k Handler) Login(c echo.Context) error {
 	user, err := k.db.GetUser(c.Request().Context(), username)
 	if err != nil {
 		slog.Warn("Login: user not found", "username", username, "error", err)
-		return c.NoContent(http.StatusBadRequest)
+		return c.HTML(http.StatusOK, `<div><meta http-equiv="refresh" content="01; url=/"><span style="color:red;">Anmeldung fehlgeschlagen</span></div>`)
 	}
 
 	if !user.Approved && k.env == "production" {
@@ -44,7 +44,12 @@ func (k Handler) Login(c echo.Context) error {
 	}
 	c.SetCookie(cookie)
 
-	return c.HTML(http.StatusOK, `<div><meta http-equiv="refresh" content="01; url=/">Erfolgreich angemeldet</div>`)
+	data := k.page
+	data.Body = `<div style="text-align:center"><meta http-equiv="refresh" content="01; url=/">Erfolgreich angemeldet</div>`
+
+	slog.Info("user logged in", "username", username)
+
+	return c.Render(http.StatusOK, "index", data)
 }
 
 func (k Handler) Register(c echo.Context) error {
@@ -69,7 +74,7 @@ func (k Handler) Register(c echo.Context) error {
 	}
 
 	if len(username) > 12 || !regexp.MustCompile("^[a-zA-Z0-9]+$").MatchString(username) {
-		slog.Error("Register: username disallowed", "username", username)
+		slog.Warn("Register: username disallowed", "username", username)
 		return c.HTML(http.StatusOK, `<span style="color:red;">Registrierung fehlgeschlagen: Benutzername nicht länger als 12 Zeichen und nur Buchstaben und Zahlen</span><br><a href="/register">Zurück</a>`)
 	}
 
@@ -89,7 +94,9 @@ func (k Handler) Register(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	return c.HTML(http.StatusOK, `<span style="color:green;">Erfolgreich registriert.</span><br><a href="/login">Jetzt Anmelden</a>`)
+	slog.Info("user registered", "username", username)
+
+	return c.HTML(http.StatusOK, `<div style="text-align:center"><span style="color:green;">Erfolgreich registriert.</span><br><a href="/login">Jetzt Anmelden</a></div>`)
 }
 
 func (k Handler) LoginView(c echo.Context) error {
@@ -123,21 +130,20 @@ func (k Handler) RegisterView(c echo.Context) error {
 	<div hx-target="this">
 		<label><b>Benutzername</b></label>
 		<div id="username-form">
-			<input name="username" hx-post="/user/name" hx-target="#username-form" hx-indicator="#ind">
+			<input name="username" hx-post="/validate/name" hx-target="#username-form" hx-indicator="#ind">
 		</div>
 
 		<label><b>Passwort</b></label>
 		<div id="password-form">
-			<input name="password" type="password" hx-post="/user/password" hx-target="#password-form">
+			<input name="password" type="password" hx-post="/validate/password" hx-target="#password-form">
 		</div>
 
 		<label><b>Passwort bestätigen</b></label>
 		<div id="confirm-form">
-			<input name="confirm" type="password" hx-post="/user/confirm" hx-target="#confirm-form">
+			<input name="confirm" type="password" hx-post="/validate/confirm" hx-target="#confirm-form">
 		</div>
 
 		<button class="btn primary">Registrieren</button>
-		<img id="ind" src="/assets/bars.svg" class="htmx-indicator"/>
 	</div>
 	</form>
 	`
@@ -189,11 +195,11 @@ func (k Handler) ValidateUsername(c echo.Context) error {
 func (k Handler) ValidatePassword(c echo.Context) error {
 	password := c.FormValue("password")
 
-	if len(password) < 8 {
+	if len(password) < 6 {
 		slog.Warn("ValidatePassword: length too short") // field with length
 
 		return c.HTML(http.StatusOK, `
-			<div style="color:red">Password muss mindestens 8 Zeichen haben.</div>
+			<div style="color:red">Password muss mindestens 6 Zeichen haben.</div>
 			<input name="password" type="password" hx-post="/validate/password" hx-target="#password-form" value="`+password+`">
 		`)
 	}
