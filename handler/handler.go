@@ -21,6 +21,9 @@ type Page struct {
 
 	// The main content (derived from markdown files in exercises/)
 	Body string
+
+	// If the code editor should be shown or not
+	Exercise bool
 }
 
 type MenuItem struct {
@@ -45,6 +48,7 @@ func New(queries *db.Queries, env string) (*Handler, error) {
 		db: queries,
 		page: Page{
 			Exercises: exercises,
+			Exercise:  false,
 		},
 		env: env,
 	}, nil
@@ -58,62 +62,6 @@ func (k Handler) Username(c echo.Context) error {
 	}
 
 	return c.HTML(http.StatusOK, `<li class="float-right">Eingeloggt als <strong>`+cookie.Value+`</strong></li>`)
-}
-
-func (k Handler) LoginView(c echo.Context) error {
-	str := `
-	<form style="margin-top: 2em" method="post" action="/login">
-	<div class="container">
-		<label for="uname"><b>Benutzername</b></label>
-		<input type="text" placeholder="Benutzername" name="username" required>
-
-		<label for="psw"><b>Passwort</b></label>
-		<input type="password" placeholder="Passwort" name="password" required>
-
-		<button type="submit" >Login</button>
-	</div>
-
-	<div class="container" style="background-color:#f1f1f1">
-		<span class="psw">Noch nicht <a href="/register">registriert</a>?</span>
-	</div>
-	</form> 
-	`
-
-	data := k.page
-	data.Body = str
-
-	return c.Render(http.StatusOK, "index", data)
-}
-
-func (k Handler) RegisterView(c echo.Context) error {
-	str := `
-	<form style="margin-top: 2em" hx-post="/register">
-	<div hx-target="this">
-		<label><b>Benutzername</b></label>
-		<div id="username-form">
-			<input name="username" hx-post="/user/name" hx-target="#username-form" hx-indicator="#ind">
-		</div>
-
-		<label><b>Passwort</b></label>
-		<div id="password-form">
-			<input name="password" type="password" hx-post="/user/password" hx-target="#password-form">
-		</div>
-
-		<label><b>Passwort bestätigen</b></label>
-		<div id="confirm-form">
-			<input name="confirm" type="password" hx-post="/user/confirm" hx-target="#confirm-form">
-		</div>
-
-		<button class="btn primary">Registrieren</button>
-		<img id="ind" src="/assets/bars.svg" class="htmx-indicator"/>
-	</div>
-	</form>
-	`
-
-	data := k.page
-	data.Body = str
-
-	return c.Render(http.StatusOK, "index", data)
 }
 
 func getExercises(queries *db.Queries) ([]MenuItem, error) {

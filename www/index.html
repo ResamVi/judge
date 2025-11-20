@@ -45,6 +45,51 @@
 
       <div style="margin-bottom: 3em">
          {{.Body}}
+
+         {{if .Exercise}}
+         <form id="codeForm" method="post">
+            <fieldset>
+               <legend>Code Editor</legend>
+
+               <div class="row">
+                  <div class="col">
+                     <label for="in_text"></label>
+                     <textarea style="width:100%; height:400px" id="in_text" type="text" placeholder="Text Input"></textarea>
+                  </div>
+               </div>
+
+               <button type="submit">SUBMIT</button>
+            </fieldset>
+         </form>
+         <script>
+            // Helper to get cookie values
+            function getCookie(name) {
+               return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
+            }
+
+            document.getElementById("codeForm").addEventListener("submit", async function (e) {
+               e.preventDefault();
+
+               const code = document.getElementById("in_text").value;
+               const username = getCookie("username");
+               const exercise = window.location.pathname.split("/").pop();
+
+               const response = await fetch("/editor", {
+                  method: "POST",
+                  headers: {
+                     "Content-Type": "application/json",
+                     "username": username,
+                     "exercise": exercise,
+                  },
+                  body: code + "\n"
+               });
+               document.getElementById("in_text").value = "";
+
+               console.log("Server response:", response.status);
+            });
+         </script>
+         {{end}}
+
          <div style="margin-top: 2em">
             <a href="/"><span>&lt;</span> Zurück zur Homepage</a>
          </div>

@@ -72,6 +72,7 @@ func main() {
 	e.GET("/exercises/:exercise/code", CodeHandler)
 	e.GET("/submission/:exercise/:user", h.Submission)
 
+	e.POST("/editor", h.Editor)
 	e.POST("/submission", h.Submit)
 	e.POST("/login", h.Login)
 	e.POST("/register", h.Register)

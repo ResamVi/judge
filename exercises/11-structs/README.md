@@ -13,18 +13,6 @@ Wir schreiben ein Programm was die Autos auf verschiedenen Rennstrecken laufen l
 
 {{Code}}
 
-2. Downloade den Code mit:   
-
-```
-judge download 09
-```
-
-
-3. Uploade den Code mit:
-```
-judge upload 09
-```
-
 ## Erinnerung
 
 Neuen struct Typ definieren

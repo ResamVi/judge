@@ -33,7 +33,7 @@ func Init(url string, adminPassword string, environment string) (*Queries, error
 	}
 
 	err = queries.CreateUser(ctx, CreateUserParams{
-		Username: "julienministrator",
+		Username: "julien",
 		Password: string(encrypted),
 		Token:    token,
 		Approved: true,

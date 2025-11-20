@@ -41,6 +41,60 @@ var Lazy = map[string]func(cmd *exec.Cmd){
 		}()
 
 	},
+
+	"10a-for-schleife": func(cmd *exec.Cmd) {
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			slog.Error("failed to get stdin pipe", "error", err.Error())
+		}
+		go func() {
+			defer stdin.Close()
+			io.WriteString(stdin, "13\n")
+		}()
+	},
+	"10b-fakultaet": func(cmd *exec.Cmd) {
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			slog.Error("failed to get stdin pipe", "error", err.Error())
+		}
+		go func() {
+			defer stdin.Close()
+			io.WriteString(stdin, "14\n")
+		}()
+	},
+	"10c-durchschnitt-berechnen": func(cmd *exec.Cmd) {
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			slog.Error("failed to get stdin pipe", "error", err.Error())
+		}
+		go func() {
+			defer stdin.Close()
+			io.WriteString(stdin, "3\n")
+			io.WriteString(stdin, "7\n")
+			io.WriteString(stdin, "5\n")
+			io.WriteString(stdin, "-5\n")
+			io.WriteString(stdin, "0\n")
+		}()
+	},
+	"10d-zahl-erraten": func(cmd *exec.Cmd) {
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			slog.Error("failed to get stdin pipe", "error", err.Error())
+		}
+		go func() {
+			defer stdin.Close()
+			io.WriteString(stdin, "0\n")
+			io.WriteString(stdin, "1\n")
+			io.WriteString(stdin, "2\n")
+			io.WriteString(stdin, "3\n")
+			io.WriteString(stdin, "4\n")
+			io.WriteString(stdin, "5\n")
+			io.WriteString(stdin, "6\n")
+			io.WriteString(stdin, "7\n")
+			io.WriteString(stdin, "8\n")
+			io.WriteString(stdin, "9\n")
+		}()
+	},
 }
 
 var Grading = map[string]Exercise{
@@ -185,6 +239,43 @@ Name enthält keine Zahlen: true
 		},
 	},
 
+	"10a-for-schleife": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("Nenne eine Zahl:\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n"),
+		},
+	},
+
+	"10b-fakultaet": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("Nenne eine Zahl:\n87178291200\n"),
+		},
+	},
+
+	"10c-durchschnitt-berechnen": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("Gebe mir Zahlen:\n5\n"),
+		},
+	},
+
+	"10d-zahl-erraten": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			CodeWith("rand.Intn(", "Sollte das math/rand Package benutzen"),
+			OutputRegex("Versuche die Zahl zu erraten:", "Frage am Anfang: 'Versuche die Zahl zu erraten:'"),
+			OutputRegex(`Anzahl der Versuche: \d+`, "Antwort am Ende: 'Anzahl der Versuche: N'"),
+		},
+	},
+
+	"10e-fizz-buzz": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16\n17\nFizz\n19\nBuzz\n"),
+		},
+	},
+
 	"X-hacking": {
 		Criteria: []Criteria{
 			NoHackingAttempt,
@@ -266,6 +357,20 @@ func OutputMatches(expected string) Criteria {
 			slog.Warn("mismatch: ", "output", output, "expected", expected)
 
 			return "❌ Ausgabe des Programms ist nicht wie erwartet:<br><pre><code>" + expected + "</code></pre>", false
+		},
+	}
+}
+
+func OutputRegex(expected string, explanation string) Criteria {
+	return Criteria{
+		Description: "Ausgabe des Programms ist wie erwartet",
+		Valid: func(code, output string) (string, bool) {
+			if regexp.MustCompile(expected).MatchString(output) {
+				return "✅ Ausgabe des Programms ist wie erwartet (<i>" + explanation + "</i>)", true
+			}
+			slog.Warn("mismatch", "output", output, "expected", expected)
+
+			return "❌ Ausgabe des Programms ist nicht wie erwartet (<i>" + explanation + "</i>)", false
 		},
 	}
 }

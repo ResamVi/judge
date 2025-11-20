@@ -43,6 +43,7 @@ func (k Handler) ExerciseHandler(c echo.Context) error {
 
 	data := k.page
 	data.Body = result
+	data.Exercise = true
 
 	return c.Render(http.StatusOK, "index", data)
 }

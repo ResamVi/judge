@@ -13,7 +13,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
+	"strings"
 )
 
 var (
@@ -90,6 +92,9 @@ func NewModel(dev bool) Model {
 	if err != nil {
 		panic(err)
 	}
+	slices.SortFunc(entries, func(a, b os.DirEntry) int {
+		return strings.Compare(b.Name(), a.Name())
+	})
 
 	var folders []list.Item
 	for _, e := range entries {

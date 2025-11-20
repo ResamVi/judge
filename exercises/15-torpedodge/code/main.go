@@ -1,34 +1,66 @@
+// Package main implements a bot that circles around and drops a bomb occasionally.
 package main
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"os"
+
+	"github.com/coder/websocket"
+	"github.com/coder/websocket/wsjson"
+	"github.com/rebirth-in-ruins/torpedodge/server/game"
+)
+
+const (
+	gameserverURL = "wss://gameserver.resamvi.io/play"
+	playerName    = "GolangBot"
+)
+
+var (
+	directions = []string{"LEFT", "BOMBLEFT", "DOWN", "DOWN", "RIGHT", "RIGHT", "UP", "UP"}
+)
 
 func main() {
-	fmt.Println(geradeKarten())
-	fmt.Println(zieheKarten([]int{1, 2, 3}, 2))
-	fmt.Println(zieheKarten([]int{1, 2, 3, 4, 5}, 12))
-	fmt.Println(ersetzeKarte([]int{1, 2, 3, 4, 5}, 1, 10))
-	fmt.Println(ersetzeKarte([]int{1, 2, 3, 4, 5}, 12, 10))
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
 }
 
-// TODO: Definiere eine Funktion "geradeKarten"
-// - Die Funktion gibt ein slice zurück von allen Karten die gerade sind
+func run() error {
+	conn, _, err := websocket.Dial(context.Background(), gameserverURL, nil)
+	if err != nil {
+		return fmt.Errorf("could not dial server: %w (url: %v)", err, gameserverURL)
+	}
+	defer conn.CloseNow()
 
-// TODO: Definiere eine Funktion 'zieheKarte'.
-// - Die Funktion nimmt zwei Parameter:
-//		- Ein Stapel an Karten ([]int)
-//		- Die Position der Karte die aus dem Stapel gezogen wird (int)
-// - Die Funktion gibt die Karte zurück die an der übergebenenen Position ist
-// - Wenn die Zahl größer ist als die Anzahl der Karten im Slice gib -1 zurück
+	// Send initial JOIN message with your name
+	err = wsjson.Write(context.Background(), conn, "JOIN "+playerName+".go")
+	if err != nil {
+		return fmt.Errorf("could not join server: %w", err)
+	}
 
-// TODO: Definiere eine Funktion 'ersetzeKarte'
-// - Die Funktion nimmt drei Parameter:
-//		- Ein Stapel an Karten ([]int)
-//		- Die Position der Karte die ersetzt wird (int)
-//		- Die neue Karte mit der sie ersetzt wird (int)
-// - Die Funktion ersetzt an der Position des Slices die Karte mit der neuen Zahl und gibt das neue Slice zurück
+	i := 0
 
-// TODO: Definiere eine Funktion 'ergänzeKarte'
-// - Die Funktion nimmt zwei Parameter:
-//		- Ein Stapel an Karten ([]int)
-//		- Die neue Karte die ergänzt wird
-// - Die Funktion gibt den Stapel zurück mit der neuen Karte an der letzten Position
+	for {
+		// RECEIVE NEXT STATE
+		var state game.GameStateResponse
+		err := wsjson.Read(context.Background(), conn, &state)
+		if err != nil {
+			return fmt.Errorf("could not read from conn: %w", err)
+		}
+
+		// Sail in a circle
+		action := directions[i%len(directions)]
+		slog.Info(action)
+
+		// SEND ACTION
+		err = wsjson.Write(context.Background(), conn, action)
+		if err != nil {
+			return fmt.Errorf("could not send next action: %w", err)
+		}
+
+		i++
+	}
+}
