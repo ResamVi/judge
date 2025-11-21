@@ -33,7 +33,7 @@ func (k Handler) Submission(c echo.Context) error {
 		data.Body += "Aufgabe muss gelöst werden bevor man andere Lösungen ansehen darf"
 		return c.Render(http.StatusOK, "index", data)
 	}
-	if cookie.Value != c.Param("user") && viewerSubm.Solved != int32(grading.Solved) {
+	if fmt.Sprintf("%d", viewer.ID) != c.Param("user") && viewerSubm.Solved != int32(grading.Solved) {
 		data := k.page
 		data.Body += "Aufgabe muss gelöst werden bevor man andere Lösungen ansehen darf"
 		return c.Render(http.StatusOK, "index", data)
