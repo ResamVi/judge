@@ -10,17 +10,19 @@ func main() {
 }
 
 func stapel() []string {
-	return []string{}
+	return []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
 }
 
-func karteNehmen(stapel []string, karte int) []string {
-	return []string{}
+func karteNehmen(stapel []string, karte int) string {
+	return stapel[karte]
 }
 
 func karteAustauschen(stapel []string, position int, karte string) []string {
-	return []string{}
+	stapel[position] = karte
+	return stapel
 }
 
 func karteHinzufügen(stapel []string, karte string) []string {
-	return []string{}
+	stapel = append(stapel, karte)
+	return stapel
 }

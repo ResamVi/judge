@@ -4,6 +4,7 @@ import "fmt"
 
 func main() {
 	var meinSlice []int // Leer
+	fmt.Println(meinSlice)
 	//meinSlice := []int{9, 10, 11, 12, 13, 14} // mit Daten gefüllt
 
 	fmt.Println(meinSlice[3]) // 12

@@ -95,6 +95,16 @@ var Lazy = map[string]func(cmd *exec.Cmd){
 			io.WriteString(stdin, "9\n")
 		}()
 	},
+	"14-errors": func(cmd *exec.Cmd) {
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			slog.Error("failed to get stdin pipe", "error", err.Error())
+		}
+		go func() {
+			defer stdin.Close()
+			io.WriteString(stdin, "023\n")
+		}()
+	},
 }
 
 var Grading = map[string]Exercise{
@@ -273,6 +283,62 @@ Name enthält keine Zahlen: true
 		Criteria: []Criteria{
 			NoHackingAttempt,
 			OutputMatches("1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16\n17\nFizz\n19\nBuzz\n"),
+		},
+	},
+
+	"11-slices": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputMatches("[1 2 3 4 5 6 7 8 9 10 J Q K A]\n4\n[1 2 3 4 5 6 7 8 9 10 J Q K K]\n[1 2 3 4 5 6 7 8 9 10 J Q K A 1]\n"),
+			CodeWith(`func main() {
+	fmt.Println(stapel())
+	fmt.Println(karteNehmen(stapel(), 3))
+	fmt.Println(karteAustauschen(stapel(), 13, "K"))
+	fmt.Println(karteHinzufügen(stapel(), "1"))
+}`, "Die main Funktion wurde nicht verändert"),
+		},
+	},
+
+	"12a-structs": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			OutputRegex("60", "Fläche des Rechtecks wird berechnet"),
+			OutputRegex("Der Film \\w+ kam im Jahr \\d+ und gehört zur \\w+ Genre", "Werbung angezeigt"),
+			OutputRegex(`main.Konto{Name:"Svenja Schmidt", Guthaben:100}`, "Konto angezeigt"),
+			CodeWith(`fmt.Printf("%#v\n", kontoÖffnen("Svenja Schmidt", 100))`, "kontoÖffnen blieb unverändert"),
+			CodeWith(`werbungZeigen(Film{`, "werbungZeigen kriegt ein Film struct übergeben"),
+			CodeWith(`fmt.Println(flächeBerechnen(Rechteck{Höhe: 12, Breite: 5}))`, "flächeBerechnen blieb unverändert"),
+		},
+	},
+
+	"12b-autorennen": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			CodeWith(`func main() {
+	fmt.Println(baueAuto(50, 10))
+	fmt.Println(fahren(baueAuto(50, 10)))
+	fmt.Println(prüfeFahrt(Auto{batteriestand: 0}, Rennstrecke{distanz: 10}))
+	fmt.Println(prüfeFahrt(Auto{batteriestand: 100, batterieverbrauch: 1, geschwindigkeit: 0}, Rennstrecke{distanz: 10}))
+	fmt.Println(prüfeFahrt(Auto{batteriestand: 100, batterieverbrauch: 1, geschwindigkeit: 10}, Rennstrecke{distanz: 10}))
+}`, "Die main Funktion wurde nicht verändert"),
+
+			OutputMatches("{100 10 50 0}\n{90 10 50 50}\nfalse\nfalse\ntrue\n"),
+		},
+	},
+
+	"13-module": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			CodeWith(`"github.com/sanity-io/litter"`, "Das Modul wurde importiert"),
+			OutputMatches("main.Person{\n  Name: \"Max Mustermann\",\n  Alter: 40,\n  Adresse: main.Adresse{\n    Straße: \"Mustermannstraße\",\n    Stadt: \"Karlsruhe\",\n    PLZ: \"76131\",\n  },\n}\n"),
+		},
+	},
+
+	"14-errors": {
+		Criteria: []Criteria{
+			NoHackingAttempt,
+			CodeWith(`fmt.Println("Passwort angenommen")`, "Passwort angenommen wird ausgegeben"),
+			OutputMatches("Gebe ein Passwort ein:\nPasswort ist zu kurz\n"),
 		},
 	},
 

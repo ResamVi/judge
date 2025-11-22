@@ -93,7 +93,12 @@ func (k Handler) executeSubmission(user db.User, destDir, exercise, code string)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	runCmd := exec.CommandContext(ctx, "go", "run", destDir+"/main.go")
+	//err := exec.Command("bash", "-c", fmt.Sprintf("cd %s && go mod tidy", destDir)).Run()
+	//if err != nil {
+	//	slog.Error("go mod tidy failed", "username", user.Username, "userId", user.ID, "exercise", exercise, "error", err.Error())
+	//}
+
+	runCmd := exec.CommandContext(ctx, "bash", "-c", fmt.Sprintf("cd %s && go mod tidy && go run main.go", destDir))
 
 	var buildStderr, buildStdout bytes.Buffer
 	runCmd.Stderr = &buildStderr

@@ -10,7 +10,7 @@ Beispielausgabe: `["1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "J" "Q" "K" "A"]`
 
 - Schreibe eine Funktion **karteAustauschen** welche einen Stapel, eine Zahl n und eine Karte nimmt und die Karte an der Stelle n ändert
 
-- Schreibe eine Funktion **karteHinzufügen** welche einen Stapel und eine Karte nimmt und die Karte auf den Stapel legt
+- Schreibe eine Funktion **karteHinzufügen** welche einen Stapel und eine Karte nimmt und die Karte auf den Stapel ans Ende legt
 
 ## Neue Konzepte
 

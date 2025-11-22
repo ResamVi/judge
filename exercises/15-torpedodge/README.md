@@ -1,53 +1,30 @@
-# Kartentricks
+# Torpedodge
 
-Wir arbeiten mit einem Stapel an Spielkarten und wollen diese in einem Programm etwas manipulieren.
-Um die Sache einfacher zu machen gehen die Karten nur von 1 bis 10
+Die Geschichte:  
+Wir steuern ein einfaches Fischerboot auf offener See.
+Wegen hohem Wettbewerb müssen wir unsere Fischerplätze mit allen Mitteln verteidigen.
+Außerdem ist unser Meer Kriegsgebiet und Luftschläge fallen aus dem Himmel
+
+Du arbeitest innerhalb der `decideMove`-Funktion, darfst aber den Namen deines Schiffs ändern (Variable `playerName`)
+
+Das Programm kriegt alle drei Sekunden die Möglichkeit einen Zug zu machen. Grundlage für die Entscheidung ist
+der `state` Parameter und als Rückgabewert von `decideMove` wird ein String erwartet der einer von diesen ist:
+
+LEFT
+RIGHT
+DOWN
+UP
+BOMB
+BOMBLEFT
+BOMBRIGHT
+BOMBDOWN
+BOMBUP
+LASER
 
 ## Neue Konzepte
 
-1. Slices
+1. Viel experimentieren
 
 ## Code
 
 {{Code}}
-
-2. Downloade den Code mit:   
-
-```
-judge download 10
-```
-
-
-3. Uploade den Code mit:
-```
-judge upload 10
-```
-
-## Erinnerung
-
-Wie man slices definiert
-```
-var leer []int                 
-mitInhalt := []int{0,1,2,3,4,5}
-```
-
-Einzelne Felder eines Slices füllen
-
-```
-mitInhalt[1] = 5
-x := mitInhalt[1] // x ist 5
-```
-
-Neue Elemente an ein Slice hängen mit `append`
-```
-a := []int{1, 3}
-a = append(a, 4)
-// => []int{1,3,4}
-```
-
-Länge eines Slices herausfinden
-```
-a := []int{1, 3, 5, 7}
-laenge := len(a)
-// => laenge ist 4
-```

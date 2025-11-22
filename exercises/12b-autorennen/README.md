@@ -1,9 +1,11 @@
-# Structs
+# Autorennen
 
-In dieser Aufgabe wird ein Rennen organisiert mit Batteriebetriebenen Autos.
+In dieser Aufgabe wird ein Rennen organisiert mit batteriebetriebenen Autos.
 Autos haben verschiedene Geschwindigkeiten und Akkulaufzeiten.
 
 Wir schreiben ein Programm was die Autos auf verschiedenen Rennstrecken laufen lässt und prüft, ob sie ans Ende kommen.
+
+Mehr Anweisungen sind in den Kommentaren vom Code.
 
 ## Neue Konzepte
 
